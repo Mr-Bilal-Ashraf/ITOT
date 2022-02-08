@@ -1,7 +1,11 @@
-from pyexpat import model
-from tkinter import CASCADE
+
 from django.db import models
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
+
+
+class ConfCode(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    Con_code = models.CharField(max_length=6, null=True, blank=True)
 
 
 class School(models.Model):
@@ -45,7 +49,7 @@ class Teachers(models.Model):
 
 
 class Applications(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     school = models.OneToOneField(School, on_delete=models.CASCADE)
     teacher = models.ForeignKey(Teachers, on_delete= models.CASCADE, null=True, blank=True)
     class_name = models.ForeignKey(Classes, on_delete=models.CASCADE, null=True, blank=True)
@@ -61,7 +65,6 @@ class User_Info(models.Model):
     mbl_num = models.CharField(max_length=12, null=True, blank=True)
     religion = models.CharField(max_length=20)
     role = models.IntegerField()                                 # 0 => user, 1 => student, 2 => teacher, 3 => admin
-    Con_code = models.CharField(max_length=6, null=True, blank=True)
 
 
 class School_Admins(models.Model):
@@ -78,5 +81,5 @@ class Students(models.Model):
     class_name = models.ForeignKey(Classes, on_delete=models.CASCADE)
     section = models.CharField(max_length=30, blank=True, null=True)
     roll_num = models.CharField(max_length=3)
-    registered_by = models.ForeignKey(Teachers)
+    registered_by = models.ForeignKey(Teachers, on_delete=models.SET_NULL, null=True, blank=True)
     

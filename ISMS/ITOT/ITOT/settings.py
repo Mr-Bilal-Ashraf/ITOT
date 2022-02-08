@@ -47,7 +47,7 @@ ROOT_URLCONF = 'ITOT.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -58,6 +58,11 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'registration.authentication.EmailAuthBackend',
 ]
 
 WSGI_APPLICATION = 'ITOT.wsgi.application'
@@ -119,3 +124,9 @@ MEDIA_ROOT =  os.path.join(BASE_DIR, 'media/')
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = "mr.bilal2066@gmail.com"
+EMAIL_HOST_PASSWORD = "Aahoo622"
+EMAIL_POST = 587
+EMAIL_USE_TLS = True
