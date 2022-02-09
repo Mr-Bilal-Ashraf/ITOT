@@ -14,9 +14,5 @@ class ser_log_in(serializers.Serializer):
     password = serializers.CharField(max_length=100)
 
 
-class ser_conf_code(serializers.Serializer):
-    code = serializers.CharField(max_length=150)
-
-
-
-
+class ser_forgot_password(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
