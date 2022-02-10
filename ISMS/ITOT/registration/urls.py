@@ -10,10 +10,14 @@ urlpatterns = [
     path('forgot/password/', views.forgot_password, name="forgot_password"),                                #get email OR username and send reset password email
     path('forgot/password/reset/', views.forgot_password_reset, name="forgot_password_reset"),              #get code and new password to reset password
     path('update/password/', views.update_password, name="update_password"),                                #update password from settings, get old & new password
+    path('update/profile/', views.upda.as_view(), name="update_profile"),
     # path('forgot/password/reset/', views.forgot_password_reset, name="forgot_password_reset"),
-    
 
 
+
+
+
+    path('check/', views.check, name="check"),
     path('del/', views.del_user, name="del_user"),
 
 ]

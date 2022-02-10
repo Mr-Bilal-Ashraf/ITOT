@@ -1,5 +1,7 @@
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib import auth
@@ -8,8 +10,15 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
 
-from .models import ConfCode
-from .serializers import ser_user, ser_log_in, ser_forgot_password
+
+import sys
+from PIL import Image, ImageOps
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
+
+from .models import ConfCode, User_Info
+from .serializers import ser_update_profile, ser_user, ser_log_in, ser_forgot_password
 
 
 @api_view(['POST'])
@@ -32,6 +41,8 @@ def sign_up(request):
             code = randint(111111,999999)
             a = ConfCode.objects.create(user=user, Con_code = code)
             a.save()
+            b = User_Info.objects.create(user=user)
+            b.save()
             html_message = render_to_string('registration/Conf_Email.html', {'username':data["username"], "link": f"http://localhost:8000/reg/{user.id}/conf/code/{code}/"})
             plain_message = strip_tags(html_message)
             from_email = "From <mr.bilal2066@gmail.com>"
@@ -53,7 +64,8 @@ def sign_up(request):
                     send_mail("Email Confirmation...", plain_message, from_email, [to_email], html_message= html_message)
 
                     result["status"] = 2                                                        #ask for confirmation code, ConfCode sent to email
-                
+            else:
+                result["status"] = 3                                                            #username already used
         return Response(result)
     else:
         return Response({'x': 1})                                                               #data not valid
@@ -67,11 +79,9 @@ def confirm_code(request,id,code):
             user.is_active = True
             user.save()
             user.confcode.delete()
-        return Response({"id":id, "code":user.confcode.Con_code})
+        return Response({'status':0})                                                           #account activated successfully
     else:
-        return Response({"id":id})
-
-
+        return Response({'status':1})                                                           #user does not exist
 
 
 @api_view(['POST'])
@@ -85,20 +95,20 @@ def sign_in(request):
 
         if user is not None:
             auth.login(request, user)
-            return Response({'x': 0})               #active and login
+            return Response({'status': 0, 'role':request.user.user_info.role})               #logined
         else:
-            return Response({'x': 1})               #not activated OR user not found. check your email,username and password
+            return Response({'status': 1})               #not activated OR user not found. check your email,username and password
     else:
-        return Response({'x': 2})                   #given data has problems
+        return Response({'status': 2})                   #given data has problems
 
 
 @api_view(['GET'])
 def sign_out(request):
     try:
         auth.logout(request)
-        return Response({'x':1})
+        return Response({'status':1})                    #logout
     except:
-        return Response({'x':0})
+        return Response({'status':0})                     #error
 
 
 @api_view(['POST'])
@@ -147,7 +157,7 @@ def forgot_password_reset(request):
         else:
                 return Response({"status":2})                                                                       #user does not exist
     else:
-        return Response({"status":3})                                                                           #invalid data
+        return Response({"status":3})                                                                               #invalid data
 
 
 @api_view(['POST'])
@@ -158,11 +168,74 @@ def update_password(request):
         if request.user.check_password(data["username"]):
             request.user.set_password(data["password"])
             request.user.save()
-            return Response({'a':1})
+            return Response({'status':0})                                                                           #password updated
         else:
-            pass
+            return Response({'status':1})                                                                           #wrong password
     else:
-        pass
+        return Response({'status':2})                                                                               #invalid data
+
+
+# @parser_classes([MultiPartParser, FormParser])
+# @api_view(['POST'])
+# def update_profile(request):
+#     # for x in request.data:
+#     #     if request.data[x] == "null":
+#     #         request.data[x] = None
+#     #     if x == "profile" and request.data[x] != None:
+#     #         imageTemproary = Image.open(request.data[x])
+#     #         outputIoStream = BytesIO()
+#     #         imageTemproary = imageTemproary.resize((150,150),Image.ANTIALIAS)
+#     #         imageTemproary = ImageOps.exif_transpose(imageTemproary)
+#     #         imageTemproary.save(outputIoStream , format='webp', quality=90)
+#     #         outputIoStream.seek(0)
+#     #         request.data[x] = InMemoryUploadedFile(outputIoStream,'ImageField', "%s.webp" % request.data[x].name.split('.')[0], 'image/webp', sys.getsizeof(outputIoStream), None)
+
+#     abcd = ser_update_profile(data=request.data)
+#     if abcd.is_valid():
+#         print(abcd.data)
+#         return Response({'status':abcd.data})
+#     else:
+#         print(abcd.errors)
+#         return Response({'status':0})
+
+
+class upda(APIView):
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    def post(self, request, format=None):
+        abcd = ser_update_profile(data=request.data)
+        if abcd.is_valid():
+            abcd.update(request.user)
+            return Response({'status':abcd.data})
+        else:
+            print(abcd.errors)
+            return Response({'status':0})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@api_view(['GET'])
+def check(request):
+    return render(request,'registration/check.html')
+
+
 
 
 @api_view(['GET'])

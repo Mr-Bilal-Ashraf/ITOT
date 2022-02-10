@@ -60,11 +60,11 @@ class Applications(models.Model):
 class User_Info(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     pic = models.ImageField(upload_to="user_pics/", blank=True, null=True)
-    DOB = models.DateField()
+    Birth_Date = models.CharField(max_length=10)
     gender = models.BooleanField(default=True)                           #true means "male" OR false means "female"
     mbl_num = models.CharField(max_length=12, null=True, blank=True)
-    religion = models.CharField(max_length=20)
-    role = models.IntegerField()                                 # 0 => user, 1 => student, 2 => teacher, 3 => admin
+    religion = models.CharField(max_length=20, default="Islam")
+    role = models.IntegerField(default=0)                                 # 0 => user, 1 => student, 2 => teacher, 3 => admin
 
 
 class School_Admins(models.Model):
