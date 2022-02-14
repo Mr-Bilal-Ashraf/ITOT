@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <body>
-    <input type="file" accept="image/png, image/jpeg" id="pic">
+    <input type="file" accept="image/png, image/jpeg" id="pic" multiple>
     <input type="date" id="date">
     <button onclick="hy()">send</button>
 </body>
@@ -31,13 +31,23 @@
 
     function hy(){
         let formdata = new FormData()
-        formdata.append('pic', document.getElementById("pic").files[0])
-        formdata.append('Birth_Date', document.getElementById("date").value)
-        formdata.append('gender', 0)
-        formdata.append('mbl_num', "0301-6070981")
-        formdata.append('religion', "Muslim")
+        logo = document.getElementById("pic").files[0] ? document.getElementById("pic").files[0] : null;
+        pic1 = document.getElementById("pic").files[1] ? document.getElementById("pic").files[1] : null;
+        pic2 = document.getElementById("pic").files[2] ? document.getElementById("pic").files[2] : null;
+        pic3 = document.getElementById("pic").files[3] ? document.getElementById("pic").files[3] : null;
 
-        fetch('/reg/update/profile/', {
+        formdata.append('logo', logo)
+        formdata.append('pic1', pic1)
+        formdata.append('pic2', pic2)
+        formdata.append('pic3', pic3)
+        // formdata.append('birth', document.getElementById("date").value)
+        // formdata.append('gender', 0)
+        // formdata.append('mbl_num', "0301-6070981")
+        // formdata.append('religion', "Muslim")
+        // formdata.append('name', "Muhammad Farooq")
+        // formdata.append('father_name', "Muhammad Ashraf")
+
+        fetch('/reg/update/logo/', {
             headers: {
                 "X-CSRFToken": getCookie("csrftoken")
             },
