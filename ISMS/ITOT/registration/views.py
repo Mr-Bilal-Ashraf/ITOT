@@ -10,7 +10,7 @@ from django.core.mail import send_mail
 
 
 from .models import ConfCode, User_Info, School,School_Admins,Classes, Applications, Scl_images
-from .serializers import ser_logo, ser_schl_apps, ser_update_profile, ser_user, ser_log_in, ser_forgot_password, ser_reg_classes, ser_reg_school,ser_reg_admin
+from .serializers import ser_logo, ser_schl_apps, ser_srch_school, ser_update_profile, ser_user, ser_log_in, ser_forgot_password, ser_reg_classes, ser_reg_school,ser_reg_admin,ser_show_schl
 
 
 @api_view(['POST'])
@@ -228,7 +228,7 @@ def register_school(request):
 def show_school_applications(request):
     if request.user.is_superuser:
         data = []
-        schls = Applications.objects.filter(role=0).values('school','app_date')
+        schls = Applications.objects.filter(role=0,status=0).values('school','app_date').order_by("id").reverse()
         for schl in schls:
             scl_obj = School.objects.get(pk=schl["school"])
             result = {'id':scl_obj.id ,'logo': scl_obj.logo, 'name': scl_obj.name, 'city': scl_obj.city, 'app_date': schl["app_date"]}
@@ -242,28 +242,93 @@ def show_school_applications(request):
 @api_view(['POST'])
 def show_specific_school(request):
     if request.user.is_superuser:
+        data = {}
+        scl = School.objects.get(pk=request.data["id"])
 
-        pass
+        data["user_name"] = scl.school_admins.user.first_name
+        data["father_name"] = scl.school_admins.user.last_name
+        data["mbl_num"] = scl.school_admins.user.user_info.mbl_num
+        data["pic"] = scl.school_admins.user.user_info.pic
+        data["landline"] = scl.school_admins.landline
+        data["designation"] = scl.school_admins.designation
+        data["name"]= scl.name
+        data["email"]= scl.email
+        data["province"]= scl.province
+        data["city"]= scl.city
+        data["tehsil"]= scl.tehsil
+        data["web"]= scl.web
+        data["type"]= scl.type
+        data["play_area"]= scl.play_area
+        data["status_of_property"]= scl.status_of_property
+        data["area"]= scl.area
+        data["total_stu"]= scl.total_stu
+        data["logo"]= scl.logo
+        data["location"]= scl.location
+        data["address"]= scl.address
+        data["max_teachers"]= scl.max_teachers
+        classes = scl.classes_set.all()
+        cl = []
+
+        for b in classes:
+            a = {"name": b.name, "max_stu":b.max_stu, "fee": b.fee}
+            cl.append(a)
+        data["classes"] = cl
+
+        scl_imgs = scl.scl_images_set.all()
+        count = 1
+        for b in scl_imgs:
+            data[f"pic{count}"]=b.pic
+            count +=1
+        school_data = ser_show_schl(data)
+
+        return Response({'admin':school_data.data})
     else:
         return Response({'admin':0})
 
 
 @api_view(['POST'])
 def approve_school(request):
-    pass
+    if request.user.is_superuser:
+        schl = School.objects.get(pk=request.data["schl_id"])
+        schl_name = schl.name.upper().split(" ")
+        schl_abbr = ""
+        for a in schl_name:
+            schl_abbr += a[0]
+        schl_abbr = schl_abbr[:3]
+        l_k = f"{schl_abbr}-S{schl.id:02}-U{schl.school_admins.user.id:02}"
+        schl.is_active = True
+        schl.key = l_k
+        schl.save()
+        Applications.objects.filter(school= schl,role=0).update(status=1)
+        user__info = schl.school_admins.user.user_info
+        user__info.role = 3
+        user__info.save()
+
+        # html_message = render_to_string('registration/app_school.html', {'l_k':l_k})
+        # plain_message = strip_tags(html_message)
+        # from_email = "From <mr.bilal2066@gmail.com>"
+        # to_email = schl.school_admins.user.email
+        # send_mail("School Registration Status...", plain_message, from_email, [to_email], html_message= html_message)
+        return Response({'status':l_k})
+    else:
+        return Response({'admin':0})
 
 
 @api_view(['POST'])
 def reject_school(request):
     if request.user.is_superuser:
         reason = request.data["reason"]
-        # html_message = render_to_string('registration/Conf_Email.html', {'username':data["username"], "link": f"http://localhost:8000/reg/{user.id}/conf/code/{code}/"})
+        schl_id = request.data["schl_id"]
+        schl = School.objects.get(pk=schl_id)
+        schl.delete()
+        # html_message = render_to_string('registration/rej_school.html', {'reason':reason})
         # plain_message = strip_tags(html_message)
         # from_email = "From <mr.bilal2066@gmail.com>"
-        # to_email = data["email"]
-        # send_mail("Email Confirmation...", plain_message, from_email, [to_email], html_message= html_message)
-    return Response({'reason': reason})
-
+        # to_email = schl.school_admins.user.email
+        # send_mail("School Registration Status...", plain_message, from_email, [to_email], html_message= html_message)
+        return Response({'status':1})
+    else:
+        return Response({'admin':0})
 
 @api_view(['POST'])
 def update_logo(request):
@@ -277,8 +342,7 @@ def update_logo(request):
         data.update(request.user)
         return Response({"updated":1})
     else:
-        # return Response({"updated":0})
-        return Response({"updated":data.errors})
+        return Response({"updated":0})
         
 
 @api_view(['GET'])
@@ -295,6 +359,27 @@ def get_profile(request):
         return Response({'is_logged_in':0})
 
 
+@api_view(['POST'])
+def schl_list(request):
+    srch_query = {}
+    
+    for key, value in request.data.items():
+        srch_query[key] = value.lower()
+    srch_query["is_active"] = True
+    resulted_schools = School.objects.filter(**srch_query).values("logo", "name", "address")
+    da = []
+    for a in resulted_schools:
+        d = {}
+        for key, value in a.items():
+            if key == "logo" and len(value) != 0:
+                value = "/media/"+value
+            d[key] = value
+        da.append(d)
+    
+    resulted_schools = ser_srch_school(data=da, many=True)
+    if resulted_schools.is_valid():
+        return Response({"a":resulted_schools.data})
+    return Response({"a":resulted_schools.errors})
 
 
 

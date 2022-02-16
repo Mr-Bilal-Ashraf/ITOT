@@ -18,6 +18,8 @@ urlpatterns = [
     path('rej/school/', views.reject_school, name="reject_school"),
     path('app/school/', views.approve_school, name="approve_school"),
     path('show/school/apps/', views.show_school_applications, name="show_school_applications"),
+    path('show/school/details/', views.show_specific_school, name="show_specific_school"),
+    path('school/list/', views.schl_list, name="show_school_list"),
     # path('forgot/password/reset/', views.forgot_password_reset, name="forgot_password_reset"),
 
 
