@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from .models import School, School_Admins, Scl_images, Students, Classes, Teachers, Applications, User_Info
+from .models import School, School_Admins, Scl_images, Students, Classes, Applications, User_Info
 
 class ser_user(serializers.Serializer):
     username = serializers.CharField(max_length=150)
@@ -110,3 +110,12 @@ class ser_srch_school(serializers.Serializer):
     logo = serializers.CharField(max_length=150,allow_blank=True)
     name = serializers.CharField(max_length=60)
     address = serializers.CharField(max_length=150)
+
+
+class ser_schedules(serializers.Serializer):
+    id = serializers.IntegerField()
+    logo = serializers.CharField(max_length=150,allow_blank=True)
+    name = serializers.CharField(max_length=60)
+    address = serializers.CharField(max_length=150)
+    date = serializers.DateTimeField()
+

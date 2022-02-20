@@ -46,14 +46,14 @@ class Classes(models.Model):
 
 
 class Teachers(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     school = models.ForeignKey(School, on_delete=models.CASCADE)
     classes = models.ManyToManyField(Classes)
 
 
 class Applications(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    school = models.OneToOneField(School, on_delete=models.CASCADE)
+    school = models.ForeignKey(School, on_delete=models.CASCADE)
     teacher = models.ForeignKey(Teachers, on_delete= models.CASCADE, null=True, blank=True)
     class_name = models.ForeignKey(Classes, on_delete=models.CASCADE, null=True, blank=True)
     role = models.IntegerField(default=2)                                # 0 => school, 1  => teacher, 2 => student
@@ -69,6 +69,7 @@ class User_Info(models.Model):
     mbl_num = models.CharField(max_length=12, null=True, blank=True)
     religion = models.CharField(max_length=20, default="Islam")
     role = models.IntegerField(default=0)                                 # 0 => user, 1 => student, 2 => teacher, 3 => admin
+    logged_ins = models.IntegerField(default=0)
 
 
 class School_Admins(models.Model):
@@ -89,5 +90,5 @@ class Students(models.Model):
     
 
 class Schedule(models.Model):
-    # school = models.OneToOneField(School, on_delete=models.CASCADE, primary_key=True)
+    school = models.OneToOneField(School, on_delete=models.CASCADE, primary_key=True)
     schedule = models.DateTimeField(default=datetime.now())
