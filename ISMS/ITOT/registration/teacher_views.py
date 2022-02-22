@@ -9,7 +9,7 @@ from random import randint
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
-from .views import get_user_from_session, email_reset_password, remove_all_sessions
+from .views import get_user_from_session
 
 
 from .models import Applications, Teachers, User_Info, School, Classes
@@ -68,11 +68,11 @@ def reject_teacher_application(request):
         user_name = appl.user.username.title()
         school_name = appl.school.name.title()
         detail = "You can reApply for the role of Teacher in any school, but it is a good practice to first contact with the school Admin."
-        # html_message = render_to_string('registration/rej_teacher.html', {'username':user_name, 'school':school_name, 'status':"Rejected", 'detail':detail})
-        # plain_message = strip_tags(html_message)
-        # from_email = "From <mr.bilal2066@gmail.com>"
-        # to_email = appl.user.email
-        # send_mail("Teacher Application Status...", plain_message, from_email, [to_email], html_message= html_message)
+        html_message = render_to_string('registration/rej_teacher.html', {'username':user_name, 'school':school_name, 'status':"Rejected", 'detail':detail})
+        plain_message = strip_tags(html_message)
+        from_email = "From <info.itotpk@gmail.com>"
+        to_email = appl.user.email
+        send_mail("Teacher Application Status...", plain_message, from_email, [to_email], html_message= html_message)
         return Response({"status": 1})
     else:
         return Response({"is_logged_in": 0})
@@ -98,11 +98,11 @@ def approve_teacher_application(request):
             user_name = appl.user.username.title()
             school_name = school.name.title()
             detail = "You can now register students in classes assigned to you by Admin."
-            # html_message = render_to_string('registration/rej_teacher.html', {'username':user_name, 'school':school_name, 'status':"Approved", 'detail':detail})
-            # plain_message = strip_tags(html_message)
-            # from_email = "From <mr.bilal2066@gmail.com>"
-            # to_email = appl.user.email
-            # send_mail("Teacher Application Status...", plain_message, from_email, [to_email], html_message= html_message)
+            html_message = render_to_string('registration/rej_teacher.html', {'username':user_name, 'school':school_name, 'status':"Approved", 'detail':detail})
+            plain_message = strip_tags(html_message)
+            from_email = "From <info.itotpk@gmail.com>"
+            to_email = appl.user.email
+            send_mail("Teacher Application Status...", plain_message, from_email, [to_email], html_message= html_message)
             return Response({"status": 1})
     else:
         return Response({"is_logged_in": 0})

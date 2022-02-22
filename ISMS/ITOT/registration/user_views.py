@@ -35,11 +35,11 @@ def sign_up(request):
             a.save()
             b = User_Info.objects.create(user=user)
             b.save()
-            # html_message = render_to_string('registration/Conf_Email.html', {'username':data["username"], "link": f"http://localhost:8000/reg/{user.id}/conf/code/{code}/"})
-            # plain_message = strip_tags(html_message)
-            # from_email = "From <mr.bilal2066@gmail.com>"
-            # to_email = data["email"]
-            # send_mail("Email Confirmation...", plain_message, from_email, [to_email], html_message= html_message) 
+            html_message = render_to_string('registration/Conf_Email.html', {'username':data["username"], "link": f"http://localhost:8000/reg/{user.id}/conf/code/{code}/"})
+            plain_message = strip_tags(html_message)
+            from_email = "From <info.itotpk@gmail.com>"
+            to_email = data["email"]
+            send_mail("Email Confirmation...", plain_message, from_email, [to_email], html_message= html_message) 
             result["status"] = 1                                                           # account created succesfully
         else:
             if result["email"]==0:
@@ -49,11 +49,11 @@ def sign_up(request):
                 else:
                     code = randint(111111,999999)
                     a = ConfCode.objects.update_or_create(user=user, defaults={"Con_code":code})            
-                    # html_message = render_to_string('registration/Conf_Email.html', {'username':data["username"], "link": f"http://localhost:8000/reg/{user.id}/conf/code/{code}/"})
-                    # plain_message = strip_tags(html_message)
-                    # from_email = "From <mr.bilal2066@gmail.com>"
-                    # to_email = data["email"]
-                    # send_mail("Email Confirmation...", plain_message, from_email, [to_email], html_message= html_message)
+                    html_message = render_to_string('registration/Conf_Email.html', {'username':data["username"], "link": f"http://localhost:8000/reg/{user.id}/conf/code/{code}/"})
+                    plain_message = strip_tags(html_message)
+                    from_email = "From <info.itotpk@gmail.com>"
+                    to_email = data["email"]
+                    send_mail("Email Confirmation...", plain_message, from_email, [to_email], html_message= html_message)
 
                     result["status"] = 2                                                        #ask for confirmation code, ConfCode sent to email
             else:
@@ -71,9 +71,9 @@ def confirm_code(request,id,code):
             user.is_active = True
             user.save()
             user.confcode.delete()
-        return Response({'status':0})                                                           #account activated successfully
+        return Response({'status':1})                                                           #account activated successfully
     else:
-        return Response({'status':1})                                                           #user does not exist
+        return Response({'status':0})                                                           #user does not exist
 
 
 @api_view(['POST'])
@@ -193,6 +193,10 @@ def update_password(request):
 def update_profile(request):
     name=request.data['name']
     father_name=request.data['father_name']
+    request.data._mutable = True
+    for x in request.data:
+        if request.data[x] == "null":
+            request.data[x] = None
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
         data = ser_update_profile(data=request.data)
@@ -203,7 +207,8 @@ def update_profile(request):
             user.save()
             return Response({'status':1})
         else:
-            return Response({'status':0})
+            return Response({'status':data.errors})
+            # return Response({'status':0})
     else:
         return Response({'is_logged_in':0})
 
@@ -229,6 +234,7 @@ def get_profile(request):
             data["father_name"]=user.last_name
             ser_user_info = ser_update_profile(User_Info.objects.get(user=user))
             data["info"] = ser_user_info.data
+            data["is_logged_in"] = 1
             return Response(data)
         else:
             return Response({'is_logged_in':0})

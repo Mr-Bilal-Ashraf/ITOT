@@ -7,10 +7,10 @@
     <title>Document</title>
 </head>
 <body>
-    <!-- <input type="file" accept="image/png, image/jpeg" id="pic" multiple> -->
-    <!-- <input type="date" id="date"> -->
-    <input type="datetime-local" id="datetime">
-    <input type="number" id="id">
+    <input type="file" accept="image/png, image/jpeg" id="pic" multiple>
+    <input type="date" id="date">
+    <!-- <input type="datetime-local" id="datetime"> -->
+    <!-- <input type="number" id="id"> -->
     <button onclick="hy()">send</button>
 </body>
 
@@ -37,22 +37,27 @@
         // pic1 = document.getElementById("pic").files[1] ? document.getElementById("pic").files[1] : null;
         // pic2 = document.getElementById("pic").files[2] ? document.getElementById("pic").files[2] : null;
         // pic3 = document.getElementById("pic").files[3] ? document.getElementById("pic").files[3] : null;
-        date = document.getElementById("datetime").value;
+        // date = document.getElementById("datetime").value;
 
-        formdata.append('date', date)
-        formdata.append("schl_id", document.getElementById("id").value)
+        // formdata.append('date', date)
+        // formdata.append("schl_id", document.getElementById("id").value)
         // formdata.append('logo', logo)
         // formdata.append('pic1', pic1)
         // formdata.append('pic2', pic2)
         // formdata.append('pic3', pic3)
-        // formdata.append('birth', document.getElementById("date").value)
-        // formdata.append('gender', 0)
-        // formdata.append('mbl_num', "0301-6070981")
-        // formdata.append('religion', "Muslim")
-        // formdata.append('name', "Muhammad Farooq")
-        // formdata.append('father_name', "Muhammad Ashraf")
+        
+        pic = document.getElementById("pic").files[0] ? document.getElementById("pic").files[0] : null;
 
-        fetch('/reg/make/schedule/', {
+        formdata.append('birth', document.getElementById("date").value)
+        formdata.append('pic',pic)
+        formdata.append('gender', 0)
+        formdata.append('mbl_num', "0301-6070981")
+        formdata.append('religion', "Islam")
+        formdata.append('name', "Muhammad Farooq")
+        formdata.append('father_name', "Muhammad Ashraf")
+        formdata.append('sessionid', "owq6ic62pvzug02c7q2lw8jkkm5cj14y")
+
+        fetch('/reg/profile/update/', {
             headers: {
                 "X-CSRFToken": getCookie("csrftoken")
             },

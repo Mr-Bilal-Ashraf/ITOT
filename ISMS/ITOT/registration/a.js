@@ -19,5 +19,5 @@ a = {
         "designation": "Principal",
         "landline": "041-2655966"
     },
-    "classes": [{ "name": "kg", "max_stu": 39, "fee": 2500 }]
+    "classes": [{ "name": "kg", "max_stu": 39, "fee": 2500 },{ "name": "kg", "max_stu": 39, "fee": 2500 },{ "name": "kg", "max_stu": 39, "fee": 2500 }]
 }

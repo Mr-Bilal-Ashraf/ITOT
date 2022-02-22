@@ -24,7 +24,8 @@ class ser_update_profile(serializers.ModelSerializer):
     def update(self, user):
         data = {}
         for a, b in self.validated_data.items():
-            data[a] = b
+            if b!= None:
+                data[a] = b
         User_Info.objects.update_or_create(user=user, defaults=data)
 
 

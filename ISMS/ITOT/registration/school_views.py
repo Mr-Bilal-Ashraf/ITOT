@@ -158,11 +158,11 @@ def make_schedule(request):
         time_to_send[0] -= 12
     time_to_send = f"{time_to_send[0]}:{time_to_send[1]} {am}"
 
-    # html_message = render_to_string('registration/schedule.html', {'date':date_to_send, 'time':time_to_send})
-    # plain_message = strip_tags(html_message)
-    # from_email = "From <mr.bilal2066@gmail.com>"
-    # to_email = schl.school_admins.user.email
-    # send_mail("ITOT Visiting Schedule...", plain_message, from_email, [to_email], html_message= html_message)
+    html_message = render_to_string('registration/schedule.html', {'date':date_to_send, 'time':time_to_send})
+    plain_message = strip_tags(html_message)
+    from_email = "From <info.itotpk@gmail.com>"
+    to_email = schl.school_admins.user.email
+    send_mail("ITOT Visiting Schedule...", plain_message, from_email, [to_email], html_message= html_message)
     return Response({"a": 1})
 
 
@@ -190,11 +190,11 @@ def approve_school(request):
             except:
                 pass
 
-            # html_message = render_to_string('registration/app_school.html', {'l_k':l_k})
-            # plain_message = strip_tags(html_message)
-            # from_email = "From <mr.bilal2066@gmail.com>"
-            # to_email = schl.school_admins.user.email
-            # send_mail("School Registration Status...", plain_message, from_email, [to_email], html_message= html_message)
+            html_message = render_to_string('registration/app_school.html', {'l_k':l_k})
+            plain_message = strip_tags(html_message)
+            from_email = "From <info.itotpk@gmail.com>"
+            to_email = schl.school_admins.user.email
+            send_mail("School Registration Status...", plain_message, from_email, [to_email], html_message= html_message)
             return Response({'status': l_k})
         else:
             return Response({'admin': 0})
@@ -211,11 +211,11 @@ def reject_school(request):
             schl_id = request.data["schl_id"]
             schl = School.objects.get(pk=schl_id)
             schl.delete()
-            # html_message = render_to_string('registration/rej_school.html', {'reason':reason})
-            # plain_message = strip_tags(html_message)
-            # from_email = "From <mr.bilal2066@gmail.com>"
-            # to_email = schl.school_admins.user.email
-            # send_mail("School Registration Status...", plain_message, from_email, [to_email], html_message= html_message)
+            html_message = render_to_string('registration/rej_school.html', {'reason':reason})
+            plain_message = strip_tags(html_message)
+            from_email = "From <info.itotpk@gmail.com>"
+            to_email = schl.school_admins.user.email
+            send_mail("School Registration Status...", plain_message, from_email, [to_email], html_message= html_message)
             return Response({'status': 1})
         else:
             return Response({'admin': 0})
