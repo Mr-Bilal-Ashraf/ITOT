@@ -32,7 +32,7 @@ class ser_update_profile(serializers.ModelSerializer):
 class ser_reg_school(serializers.ModelSerializer):
     class Meta:
         model = School
-        exclude = ['logo','key']
+        exclude = ['logo','l_key']
 
 
 class ser_reg_admin(serializers.ModelSerializer):
@@ -119,4 +119,3 @@ class ser_schedules(serializers.Serializer):
     name = serializers.CharField(max_length=60)
     address = serializers.CharField(max_length=150)
     date = serializers.DateTimeField()
-

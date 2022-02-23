@@ -28,7 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'registration',
+    'registration.apps.RegistrationConfig',
     'django_cleanup.apps.CleanupConfig',
     'corsheaders'
 ]

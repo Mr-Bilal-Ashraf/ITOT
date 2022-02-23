@@ -15,7 +15,6 @@ from .serializers import ser_logo, ser_schedules, ser_schl_apps, ser_srch_school
 
 
 
-
 @api_view(['POST'])
 def register_school(request):
     result = {"role": 0, "admin": 0, 'status': 0}
@@ -36,6 +35,20 @@ def register_school(request):
                     data=request.data["classes"], many=True)
                 if ser_school.is_valid() and ser_classes.is_valid() and ser_admin.is_valid():
                     schl = ser_school.save()
+
+                    schl_name = schl.name.upper().split(" ")
+                    schl_abbr = ""
+                    for a in schl_name:
+                        schl_abbr += a[0]
+                    schl_abbr = schl_abbr[:3]
+
+                    city_name = schl.city.split("-")
+                    schl.city= city_name[0]
+
+                    l_k = f"{schl_abbr}-{city_name[1]}-A{schl.id:02}"
+                    schl.l_key = l_k
+                    schl.save()
+
                     ser_admin.create(user, schl)
                     for a in ser_classes.data:
                         data = {}
@@ -172,14 +185,8 @@ def approve_school(request):
     if user is not None:
         if user.is_superuser:
             schl = School.objects.get(pk=request.data["schl_id"])
-            schl_name = schl.name.upper().split(" ")
-            schl_abbr = ""
-            for a in schl_name:
-                schl_abbr += a[0]
-            schl_abbr = schl_abbr[:3]
-            l_k = f"{schl_abbr}-S{schl.id:02}-U{schl.school_admins.user.id:02}"
+            l_k = schl.l_key
             schl.is_active = True
-            schl.key = l_k
             schl.save()
             Applications.objects.filter(school=schl, role=0).update(status=1)
             user__info = schl.school_admins.user.user_info

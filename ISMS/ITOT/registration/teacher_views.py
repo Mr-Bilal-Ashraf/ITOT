@@ -5,15 +5,15 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib import auth
-from random import randint
+import random
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
 from .views import get_user_from_session
 
 
-from .models import Applications, Teachers, User_Info, School, Classes
-from .serializers import ser_update_profile, ser_user, ser_log_in, ser_forgot_password
+from .models import Applications, Students, Teachers, School, Classes
+from .serializers import ser_update_profile
 
 
 @api_view(['POST'])
@@ -60,6 +60,28 @@ def teachers_applications(request):
 
 
 @api_view(['POST'])
+def students_applications(request):
+    data_to_send = []
+    user = get_user_from_session(request.data["sessionid"])
+    if user is not None:
+        schl = user.school_admins.school
+        student_applications = schl.applications_set.all().filter(role=2)
+        for a in student_applications:
+            d = {}
+            d["app_id"] = a.id
+            d["name"] = a.user.first_name
+            d["img"] = str(a.user.user_info.pic)
+            if len(d["img"]) != 0:
+                d["img"] = "/media/"+d["img"]
+            d["app_date"] = a.app_date
+            d["class"] = a.class_name.name
+            data_to_send.append(d)
+        return Response({"data": data_to_send})
+    else:
+        return Response({"is_logged_in": 0})
+
+
+@api_view(['POST'])
 def reject_teacher_application(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
@@ -68,7 +90,7 @@ def reject_teacher_application(request):
         user_name = appl.user.username.title()
         school_name = appl.school.name.title()
         detail = "You can reApply for the role of Teacher in any school, but it is a good practice to first contact with the school Admin."
-        html_message = render_to_string('registration/rej_teacher.html', {'username':user_name, 'school':school_name, 'status':"Rejected", 'detail':detail})
+        html_message = render_to_string('registration/sta_teacher.html', {'username':user_name, 'school':school_name, 'status':"Rejected", 'detail':detail})
         plain_message = strip_tags(html_message)
         from_email = "From <info.itotpk@gmail.com>"
         to_email = appl.user.email
@@ -84,32 +106,38 @@ def approve_teacher_application(request):
     if user is not None:
         appl = Applications.objects.get(pk=request.data["app_id"])
         teacher = appl.user
-        if teacher.teachers:
-            return Response({'status':0})
-        else:
+        try:
+            if teacher.teachers:
+                pass
+        except:
             school = appl.school
             classes = request.data["classes"]
             teacher = Teachers.objects.update_or_create(user=teacher, defaults={'school':school})[0]
-            teacher
             for a in classes:
                 _class_ = Classes.objects.get(pk=a["class_id"])
                 teacher.classes.add(_class_)
             teacher.save()
+            user = teacher.user.user_info
+            user.role = 2
+            user.save()
             user_name = appl.user.username.title()
             school_name = school.name.title()
             detail = "You can now register students in classes assigned to you by Admin."
-            html_message = render_to_string('registration/rej_teacher.html', {'username':user_name, 'school':school_name, 'status':"Approved", 'detail':detail})
+            html_message = render_to_string('registration/sta_teacher.html', {'username':user_name, 'school':school_name, 'status':"Approved", 'detail':detail})
             plain_message = strip_tags(html_message)
             from_email = "From <info.itotpk@gmail.com>"
             to_email = appl.user.email
             send_mail("Teacher Application Status...", plain_message, from_email, [to_email], html_message= html_message)
             return Response({"status": 1})
+        else:
+            return Response({'status':0})
+
     else:
         return Response({"is_logged_in": 0})
 
 
 @api_view(['POST'])
-def my_classes(request):
+def my_classes(request):                                                                            
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
         classes = user.school_admins.school.classes_set.all().values('name','id')
@@ -121,7 +149,45 @@ def my_classes(request):
         return Response({"is_logged_in": 0})
 
 
+@api_view(['POST'])
+def register_student(request):
+    user = get_user_from_session(request.data["sessionid"])
+    try:
+        if user.teachers:
+            pass
+    except:
+        return Response({"teacher": 0})
+    else:
+        if user is not None:
+            data = ser_update_profile(data=request.data)
+            if data.is_valid():
+                student_profile = {}
+                a = "ITOT~Ditta"
+                names = ["muhammad", "mohammad", "md", "m"]
+                stu = User.objects.create(username=''.join(random.sample(a,len(a))),first_name=request.data["name"], last_name=request.data["father_name"])
+                us = stu.first_name.split(' ')
+                if us[0].lower() in names and len(us) > 1:
+                    us = us[1].lower()
+                else:
+                    us = us[0]
+                stu.username = f"{us}-{stu.date_joined.strftime('%y')}-{stu.id:03}"
+                stu.save()
 
+                student_profile["user"] = stu
+                student_profile["section"] = request.data["section"]
+                student_profile["roll_num"] = request.data["roll_num"]
+                student_profile["registered_by"] = user.teachers
+                student_profile["class_name"] = Classes.objects.get(pk=request.data["class_id"])
+                student_profile["school"] = Classes.objects.get(pk=request.data["class_id"]).school
+                data.update(stu)
+                Students.objects.update_or_create(user=stu, defaults=student_profile)
+                Applications.objects.create(user=stu,school=student_profile["school"],teacher=user.teachers,class_name=student_profile["class_name"])
+
+                return Response({"status":1})
+            else:
+                return Response({"status":0})
+        else:
+            return Response({"is_logged_in": 0})
 
 
 @api_view(['POST'])

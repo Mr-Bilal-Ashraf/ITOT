@@ -31,6 +31,7 @@
         return "";
     }
 
+    var a;
     function hy(){
         let formdata = new FormData()
         // logo = document.getElementById("pic").files[0] ? document.getElementById("pic").files[0] : null;
@@ -48,16 +49,22 @@
         
         pic = document.getElementById("pic").files[0] ? document.getElementById("pic").files[0] : null;
 
-        formdata.append('birth', document.getElementById("date").value)
-        formdata.append('pic',pic)
-        formdata.append('gender', 0)
-        formdata.append('mbl_num', "0301-6070981")
-        formdata.append('religion', "Islam")
         formdata.append('name', "Muhammad Farooq")
         formdata.append('father_name', "Muhammad Ashraf")
-        formdata.append('sessionid', "owq6ic62pvzug02c7q2lw8jkkm5cj14y")
+        formdata.append('pic',pic)
+        formdata.append('birth', document.getElementById("date").value)
+        formdata.append('gender', 1)
+        formdata.append('mbl_num', "0301-6070981")
+        formdata.append('religion', "Islam")
+        formdata.append('roll_num', "13")
+        formdata.append('section', "Iqbal")
+        formdata.append('class_id', "16")
 
-        fetch('/reg/profile/update/', {
+        //P1-Schoolid
+
+        formdata.append("sessionid", "x8tl97z2ah78e713d0orjtpq23utnjf2")
+
+        fetch('/reg/student/', {
             headers: {
                 "X-CSRFToken": getCookie("csrftoken")
             },
@@ -67,6 +74,7 @@
             return response.json();
         }).then(function (response) {
             console.log(response);
+            a = response;
         })
 
     }
