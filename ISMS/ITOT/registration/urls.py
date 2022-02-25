@@ -14,14 +14,14 @@ urlpatterns = [
 #********************* School APIs ************************ 
 
     path('school/', school_views.register_school, name="register_school"),
-    path('update/logo/', school_views.update_logo, name="update_logo"),
-    path('show/school/apps/', school_views.show_school_applications, name="show_school_applications"),
-    path('show/school/details/', school_views.show_specific_school, name="show_specific_school"),
-    path('make/schedule/', school_views.make_schedule, name="make_schedule"),
-    path('all/schedules/', school_views.all_schedules, name="all_schedules"),
-    path('range/schedules/', school_views.schedules_range, name="schedules_range"),
-    path('rej/school/', school_views.reject_school, name="reject_school"),
-    path('app/school/', school_views.approve_school, name="approve_school"),
+    path('school/logo/update/', school_views.update_logo, name="update_logo"),
+    path('school/show/apps/', school_views.show_school_applications, name="show_school_applications"),
+    path('school/show/details/', school_views.show_specific_school, name="show_specific_school"),
+    path('school/make/schedule/', school_views.make_schedule, name="make_schedule"),
+    path('school/all/schedules/', school_views.all_schedules, name="all_schedules"),
+    path('school/range/schedules/', school_views.schedules_range, name="schedules_range"),
+    path('school/rej/', school_views.reject_school, name="reject_school"),
+    path('school/app/', school_views.approve_school, name="approve_school"),
     path('school/list/', school_views.schl_list, name="show_school_list"),
 
 
@@ -47,7 +47,9 @@ urlpatterns = [
     path('rej/teacher/', teacher_views.reject_teacher_application, name="reject_teacher_application"),
     path('app/teacher/', teacher_views.approve_teacher_application, name="approve_teacher_application"),
     path('student/', teacher_views.register_student, name="register_student"),
-    path('students/apps', teacher_views.students_applications, name="students_applications"),
+    path('students/apps/', teacher_views.students_applications, name="students_applications"),
+    path('app/student/', teacher_views.app_student, name="approve_student"),
+    path('rej/student/', teacher_views.rej_student, name="reject_student"),
 
 
     # path('forgot/password/reset/', teacher_views.forgot_password_reset, name="forgot_password_reset"),

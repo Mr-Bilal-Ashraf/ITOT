@@ -15,7 +15,7 @@ class School(models.Model):
     province =  models.CharField(max_length=30)
     city =  models.CharField(max_length=30)
     tehsil =  models.CharField(max_length=30)
-    web = models.URLField(max_length=100, blank=True, null=True)
+    web = models.CharField(max_length=100, blank=True, null=True)
     type =  models.IntegerField(default=0)                                       # 0 for male, 1 for female, 2 for co-education
     play_area = models.BooleanField(default=False)                      # false for no playarea
     status_of_property = models.BooleanField(default=False)             # flase means rented

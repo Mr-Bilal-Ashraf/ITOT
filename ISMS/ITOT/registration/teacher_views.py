@@ -4,7 +4,6 @@ from django.contrib.sessions.models import Session
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from django.contrib import auth
 import random
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -13,7 +12,8 @@ from .views import get_user_from_session
 
 
 from .models import Applications, Students, Teachers, School, Classes
-from .serializers import ser_update_profile
+from .serializers import ser_update_profile, ser_user
+from .views import CLASSES
 
 
 @api_view(['POST'])
@@ -44,7 +44,7 @@ def teachers_applications(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
         schl = user.school_admins.school
-        teacher_applications = schl.applications_set.all().filter(role=1)
+        teacher_applications = schl.applications_set.all().filter(role=1, status=0).reverse()
         for a in teacher_applications:
             d = {}
             d["app_id"] = a.id
@@ -65,7 +65,7 @@ def students_applications(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
         schl = user.school_admins.school
-        student_applications = schl.applications_set.all().filter(role=2)
+        student_applications = schl.applications_set.all().filter(role=2, status=0).reverse()
         for a in student_applications:
             d = {}
             d["app_id"] = a.id
@@ -120,6 +120,8 @@ def approve_teacher_application(request):
             user = teacher.user.user_info
             user.role = 2
             user.save()
+            appl.status = 1
+            appl.save()
             user_name = appl.user.username.title()
             school_name = school.name.title()
             detail = "You can now register students in classes assigned to you by Admin."
@@ -162,9 +164,10 @@ def register_student(request):
             data = ser_update_profile(data=request.data)
             if data.is_valid():
                 student_profile = {}
-                a = "ITOT~Ditta"
-                names = ["muhammad", "mohammad", "md", "m"]
+                a = "ITOT~Ditta~Faisalabad~alpha"
                 stu = User.objects.create(username=''.join(random.sample(a,len(a))),first_name=request.data["name"], last_name=request.data["father_name"])
+
+                names = ["muhammad", "mohammad", "md", "m"]
                 us = stu.first_name.split(' ')
                 if us[0].lower() in names and len(us) > 1:
                     us = us[1].lower()
@@ -191,9 +194,71 @@ def register_student(request):
 
 
 @api_view(['POST'])
+def app_student(request):
+    user = get_user_from_session(request.data["sessionid"])
+    appl = Applications.objects.get(pk=request.data["app_id"])
+    reg_stu = appl.class_name.reg_stu
+    max_stu = appl.class_name.max_stu
+    if user is not None:
+        if user.school_admins.school == appl.school and  reg_stu < max_stu and appl.status != 1:
+            schl_name = appl.school.name.upper().split(" ")
+            schl_abbr = ""
+            for a in schl_name:
+                schl_abbr += a[0]
+            schl_abbr = schl_abbr[:3]
+            city_name = appl.school.city.split("-")[1]
+            class_name = CLASSES[appl.class_name.name]
+            appl.user.students.G_ID = f"{schl_abbr}-{city_name}-{class_name}-R{appl.user.id:03}"
+            appl.user.students.save()
+            appl.status = 1
+            appl.save()
+            appl.user.user_info.role = 1
+            appl.user.user_info.save()
+            appl.class_name.reg_stu = appl.class_name.reg_stu+1
+            appl.class_name.save()
+            return Response({"status":1, "reg_stu":reg_stu, "max_stu":max_stu})
+        else:
+            return Response({"status":0, "reg_stu":reg_stu, "max_stu":max_stu})
+    else:
+        return Response({"is_logged_in": 0})
+
+
+@api_view(['POST'])
+def rej_student(request):
+    user = get_user_from_session(request.data["sessionid"])
+    appl = Applications.objects.get(pk=request.data["app_id"])
+    if user is not None and user.school_admins.school == appl.school:
+        appl.user.delete()
+        return Response({'status': 1})
+    else:
+        return Response({"is_logged_in": 0})
+
+
+@api_view(['POST'])
 def yahoo(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
         pass
     else:
         return Response({"is_logged_in": 0})
+
+
+
+
+
+
+
+
+
+
+
+# from rest_framework.pagination import PageNumberPagination
+
+# @api_view(['GET'])
+# def abcd(request):
+#     paginator = PageNumberPagination()
+#     paginator.page_size = 2
+#     person_objects = User.objects.all()
+#     result_page = paginator.paginate_queryset(person_objects, request)
+#     serializer = ser_user(result_page, many=True)
+#     return paginator.get_paginated_response(serializer.data)

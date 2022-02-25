@@ -17,6 +17,7 @@ from .serializers import ser_logo, ser_schedules, ser_schl_apps, ser_srch_school
 
 @api_view(['POST'])
 def register_school(request):
+    print(request.data)
     result = {"role": 0, "admin": 0, 'status': 0}
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
@@ -25,8 +26,7 @@ def register_school(request):
             # ROLE 0 => user, 1 => student, 2 => teacher, 3 => admin
             result["role"] = user.user_info.role
             # admin = 0 means user holds no school
-            result["admin"] = 1 if School_Admins.objects.filter(
-                user=user) else 0
+            result["admin"] = 1 if School_Admins.objects.filter(user=user) else 0
 
             if result["admin"] == 0 and result["role"] == 0:
                 ser_school = ser_reg_school(data=request.data["school"])
@@ -43,7 +43,6 @@ def register_school(request):
                     schl_abbr = schl_abbr[:3]
 
                     city_name = schl.city.split("-")
-                    schl.city= city_name[0]
 
                     l_k = f"{schl_abbr}-{city_name[1]}-A{schl.id:02}"
                     schl.l_key = l_k
@@ -67,7 +66,7 @@ def register_school(request):
                     return Response(result)
                 else:
                     # data not valid
-                    return Response({'x': 0})
+                    return Response({'status': 0, "a":ser_school.errors})
             else:
                 # status 0 operation fail for school application
                 return Response(result)

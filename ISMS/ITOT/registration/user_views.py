@@ -78,7 +78,6 @@ def confirm_code(request,id,code):
 
 @api_view(['POST'])
 def sign_in(request):
-    print(request.COOKIES)
     data = ser_log_in(data=request.data)
     if data.is_valid():
         data = data.data
@@ -225,7 +224,6 @@ def is_complete(request):
 
 @api_view(['POST'])
 def get_profile(request):
-    print(request.COOKIES)
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
         if user.is_authenticated:
