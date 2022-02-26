@@ -50,6 +50,8 @@ urlpatterns = [
     path('students/apps/', teacher_views.students_applications, name="students_applications"),
     path('app/student/', teacher_views.app_student, name="approve_student"),
     path('rej/student/', teacher_views.rej_student, name="reject_student"),
+    path('val/student/', teacher_views.validate_student, name="validate_student"),
+    path('act/student/', teacher_views.activate_student, name="activate_student"),
 
 
     # path('forgot/password/reset/', teacher_views.forgot_password_reset, name="forgot_password_reset"),

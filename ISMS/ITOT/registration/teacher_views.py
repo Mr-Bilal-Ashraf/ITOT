@@ -28,7 +28,7 @@ def register_teacher(request):
             Applications.objects.filter(user=user, school=schl, role=1))
         if schl.reg_teachers >= schl.max_teachers:
             data["max_teachers"] = 0
-
+            
         if data["role"] == 0 and data["max_teachers"] == 1 and data["applications"] == 0:
             Applications.objects.create(user=user, school=schl, role=1)
             return Response({"status": 1})
@@ -235,30 +235,43 @@ def rej_student(request):
 
 
 @api_view(['POST'])
+def validate_student(request):
+    G_ID = request.data["G_ID"]
+    user = request.data["username"].lower()
+    try:
+        stu = User.objects.get(username=user).students
+    except:
+        return Response({"status": 2})                              # student not registered
+    else:
+        if stu.G_ID.lower() == G_ID.lower():
+            return Response({"status": 1})
+        else:
+            return Response({"status": 0})
+
+
+@api_view(['POST'])
+def activate_student(request):
+    user = request.data["username"].lower()
+    stu = ""
+    try:
+        user = User.objects.get(username=user)
+        stu = user.students
+    except:
+        return Response({"status": 2})                              # student not registered
+    else:
+        if stu.G_ID:
+            password = request.data["password"]
+            user.set_password(password)
+            return Response({"status": 1})                          # password set
+        else:
+            return Response({"status": 0})                          # student not approved
+
+
+
+@api_view(['POST'])
 def yahoo(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
         pass
     else:
         return Response({"is_logged_in": 0})
-
-
-
-
-
-
-
-
-
-
-
-# from rest_framework.pagination import PageNumberPagination
-
-# @api_view(['GET'])
-# def abcd(request):
-#     paginator = PageNumberPagination()
-#     paginator.page_size = 2
-#     person_objects = User.objects.all()
-#     result_page = paginator.paginate_queryset(person_objects, request)
-#     serializer = ser_user(result_page, many=True)
-#     return paginator.get_paginated_response(serializer.data)
