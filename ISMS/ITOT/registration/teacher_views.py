@@ -11,8 +11,8 @@ from django.core.mail import send_mail
 from .views import get_user_from_session
 
 
-from .models import Applications, Students, Teachers, School, Classes
-from .serializers import ser_update_profile, ser_user
+from .models import Applications, Students, Teachers, School, Classes, Scl_images, School_Admins
+from .serializers import ser_update_profile, ser_reg_school, ser_reg_admin, ser_reg_classes
 from .views import CLASSES
 
 
@@ -164,7 +164,7 @@ def register_student(request):
             data = ser_update_profile(data=request.data)
             if data.is_valid():
                 student_profile = {}
-                a = "ITOT~Ditta~Faisalabad~alpha"
+                a = "Faisalabad~Ditta~ITOT"
                 stu = User.objects.create(username=''.join(random.sample(a,len(a))),first_name=request.data["name"], last_name=request.data["father_name"])
 
                 names = ["muhammad", "mohammad", "md", "m"]
@@ -236,6 +236,46 @@ def rej_student(request):
 
 @api_view(['POST'])
 def validate_student(request):
+    #
+    user = get_user_from_session(request.data["sessionid"])
+    try:
+        if user.teachers:
+            pass
+    except:
+        return Response({"teacher": 0})
+    else:
+        if user is not None:
+            data = ser_update_profile(data=request.data)
+            if data.is_valid():
+                student_profile = {}
+                a = "ITOT~Ditta~Faisalabad~alpha"
+                stu = User.objects.create(username=''.join(random.sample(a,len(a))),first_name=request.data["name"], last_name=request.data["father_name"])
+
+                names = ["muhammad", "mohammad", "md", "m"]
+                us = stu.first_name.split(' ')
+                if us[0].lower() in names and len(us) > 1:
+                    us = us[1].lower()
+                else:
+                    us = us[0]
+                stu.username = f"{us}-{stu.date_joined.strftime('%y')}-{stu.id:03}"
+                stu.save()
+
+                student_profile["user"] = stu
+                student_profile["section"] = request.data["section"]
+                student_profile["roll_num"] = request.data["roll_num"]
+                student_profile["registered_by"] = user.teachers
+                student_profile["class_name"] = Classes.objects.get(pk=request.data["class_id"])
+                student_profile["school"] = Classes.objects.get(pk=request.data["class_id"]).school
+                data.update(stu)
+                Students.objects.update_or_create(user=stu, defaults=student_profile)
+                Applications.objects.create(user=stu,school=student_profile["school"],teacher=user.teachers,class_name=student_profile["class_name"])
+
+                return Response({"status":1})
+            else:
+                return Response({"status":0})
+        else:
+            return Response({"is_logged_in": 0})
+    #
     G_ID = request.data["G_ID"]
     user = request.data["username"].lower()
     try:
@@ -251,6 +291,65 @@ def validate_student(request):
 
 @api_view(['POST'])
 def activate_student(request):
+    #
+    result = {"role": 0, "admin": 0, 'status': 0}
+    user = get_user_from_session(request.data["sessionid"])
+    if user is not None:
+        if user.is_authenticated:
+
+            # ROLE 0 => user, 1 => student, 2 => teacher, 3 => admin
+            result["role"] = user.user_info.role
+            # admin = 0 means user holds no school
+            result["admin"] = 1 if School_Admins.objects.filter(user=user) else 0
+
+            if result["admin"] == 0 and result["role"] == 0:
+                ser_school = ser_reg_school(data=request.data["school"])
+                ser_admin = ser_reg_admin(data=request.data["admin"])
+                ser_classes = ser_reg_classes(
+                    data=request.data["classes"], many=True)
+                if ser_school.is_valid() and ser_classes.is_valid() and ser_admin.is_valid():
+                    schl = ser_school.save()
+
+                    schl_name = schl.name.upper().split(" ")
+                    schl_abbr = ""
+                    for a in schl_name:
+                        schl_abbr += a[0]
+                    schl_abbr = schl_abbr[:3]
+
+                    city_name = schl.city.split("-")
+
+                    l_k = f"{schl_abbr}-{city_name[1]}-A{schl.id:02}"
+                    schl.l_key = l_k
+                    schl.save()
+
+                    ser_admin.create(user, schl)
+                    for a in ser_classes.data:
+                        data = {}
+                        for key, value in a.items():
+                            data[key] = value
+                        Classes.objects.create(
+                            school=schl, name=data["name"], max_stu=data["max_stu"], fee=data["fee"])
+
+                    Applications.objects.create(
+                        user=user, school=schl, role=0)
+                    Scl_images.objects.create(school=schl, text="pic1")
+                    Scl_images.objects.create(school=schl, text="pic2")
+                    Scl_images.objects.create(school=schl, text="pic3")
+
+                    result["status"] = 1
+                    return Response(result)
+                else:
+                    # data not valid
+                    return Response({'status': 0, "a":ser_school.errors})
+            else:
+                # status 0 operation fail for school application
+                return Response(result)
+        else:
+            # user not authenticated
+            return Response({'is_logged_in': 0})
+    else:
+        return Response({"is_logged_in": 0})
+    #
     user = request.data["username"].lower()
     stu = ""
     try:
@@ -265,6 +364,12 @@ def activate_student(request):
             return Response({"status": 1})                          # password set
         else:
             return Response({"status": 0})                          # student not approved
+
+
+
+
+
+
 
 
 

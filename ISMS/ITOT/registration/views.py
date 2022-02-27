@@ -47,7 +47,7 @@ def email_reset_password(user):
     a = ConfCode.objects.update_or_create(
         user=user, defaults={"Con_code": code})
     html_message = render_to_string(
-        'registration/for_pas_email.html', {"code": f"{code}#{b}#{user.id}"})
+        'registration/for_pas_email.html', {"code": f"{code:06}#{b:02}#{user.id:03}"})
     plain_message = strip_tags(html_message)
     from_email = "From <mr.bilal2066@gmail.com>"
     to_email = user.email

@@ -24,7 +24,6 @@ urlpatterns = [
     path('school/app/', school_views.approve_school, name="approve_school"),
     path('school/list/', school_views.schl_list, name="show_school_list"),
 
-
 #********************* General User APIs *******************
 
     path('sign/up/', user_views.sign_up, name="create_user"),
@@ -44,8 +43,8 @@ urlpatterns = [
     path('teacher/', teacher_views.register_teacher, name="register_teacher"),
     path('teachers/apps/', teacher_views.teachers_applications, name="teachers_applications"),
     path('my/classes/', teacher_views.my_classes, name="class_names_list"),                                      #show classes to school admins
-    path('rej/teacher/', teacher_views.reject_teacher_application, name="reject_teacher_application"),
-    path('app/teacher/', teacher_views.approve_teacher_application, name="approve_teacher_application"),
+    path('rej/teacher/', teacher_views.reject_teacher_application, name="reject_teacher_application"),           
+    path('app/teacher/', teacher_views.approve_teacher_application, name="approve_teacher_application"),         
     path('student/', teacher_views.register_student, name="register_student"),
     path('students/apps/', teacher_views.students_applications, name="students_applications"),
     path('app/student/', teacher_views.app_student, name="approve_student"),
