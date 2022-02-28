@@ -65,9 +65,16 @@ class ser_logo(serializers.Serializer):
         schl = user.school_admins.school
         schl.logo = self.validated_data.pop("logo")
         schl.save()
-        Scl_images.objects.update_or_create(school=schl, text="pic1", defaults={'pic':self.validated_data.pop("pic1")})
-        Scl_images.objects.update_or_create(school=schl, text="pic2", defaults={'pic':self.validated_data.pop("pic2")})
-        Scl_images.objects.update_or_create(school=schl, text="pic3", defaults={'pic':self.validated_data.pop("pic3")})
+        pic_1 = self.validated_data.pop("pic1")
+        pic_2 = self.validated_data.pop("pic2")
+        pic_3 = self.validated_data.pop("pic3")
+        if pic_1 is not None:
+            Scl_images.objects.update_or_create(school=schl, text="pic1", defaults={'pic':pic_1})
+        if pic_2 is not None:
+            Scl_images.objects.update_or_create(school=schl, text="pic2", defaults={'pic':pic_2})
+        if pic_3 is not None:
+            Scl_images.objects.update_or_create(school=schl, text="pic3", defaults={'pic':pic_3})
+
 
 class ser_schl_apps(serializers.Serializer):
     id = serializers.IntegerField()

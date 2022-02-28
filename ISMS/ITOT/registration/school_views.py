@@ -66,7 +66,7 @@ def register_school(request):
                     return Response(result)
                 else:
                     # data not valid
-                    return Response({'status': 0, "a":ser_school.errors})
+                    return Response({'status': 0})
             else:
                 # status 0 operation fail for school application
                 return Response(result)
@@ -241,9 +241,9 @@ def update_logo(request):
         data = ser_logo(data=request.data)
         if data.is_valid():
             data.update(user)
-            return Response({"updated": 1})
+            return Response({"status": 1})
         else:
-            return Response({"updated": 0})
+            return Response({"status": 0})
     else:
         return Response({"is_logged_in": 0})
 

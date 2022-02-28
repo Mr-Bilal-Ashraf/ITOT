@@ -8,7 +8,7 @@
 </head>
 <body>
     <input type="file" accept="image/png, image/jpeg" id="pic" multiple>
-    <input type="date" id="date">
+    <!-- <input type="date" id="date"> -->
     <!-- <input type="datetime-local" id="datetime"> -->
     <!-- <input type="number" id="id"> -->
     <button onclick="hy()">send</button>
@@ -34,37 +34,37 @@
     var a;
     function hy(){
         let formdata = new FormData()
-        // logo = document.getElementById("pic").files[0] ? document.getElementById("pic").files[0] : null;
-        // pic1 = document.getElementById("pic").files[1] ? document.getElementById("pic").files[1] : null;
-        // pic2 = document.getElementById("pic").files[2] ? document.getElementById("pic").files[2] : null;
-        // pic3 = document.getElementById("pic").files[3] ? document.getElementById("pic").files[3] : null;
+        logo = document.getElementById("pic").files[0] ? document.getElementById("pic").files[0] : null;
+        pic1 = document.getElementById("pic").files[1] ? document.getElementById("pic").files[1] : null;
+        pic2 = document.getElementById("pic").files[2] ? document.getElementById("pic").files[2] : null;
+        pic3 = document.getElementById("pic").files[3] ? document.getElementById("pic").files[3] : null;
         // date = document.getElementById("datetime").value;
 
         // formdata.append('date', date)
         // formdata.append("schl_id", document.getElementById("id").value)
-        // formdata.append('logo', logo)
-        // formdata.append('pic1', pic1)
-        // formdata.append('pic2', pic2)
-        // formdata.append('pic3', pic3)
+        formdata.append('logo', logo)
+        formdata.append('pic1', pic1)
+        formdata.append('pic2', pic2)
+        formdata.append('pic3', pic3)
         
-        pic = document.getElementById("pic").files[0] ? document.getElementById("pic").files[0] : null;
+        // pic = document.getElementById("pic").files[0] ? document.getElementById("pic").files[0] : null;
 
-        formdata.append('name', "Muhammad Farooq")
-        formdata.append('father_name', "Muhammad Ashraf")
-        formdata.append('pic',pic)
-        formdata.append('birth', document.getElementById("date").value)
-        formdata.append('gender', 1)
-        formdata.append('mbl_num', "0301-6070981")
-        formdata.append('religion', "Islam")
-        formdata.append('roll_num', "13")
-        formdata.append('section', "Iqbal")
-        formdata.append('class_id', "16")
+        // formdata.append('name', "Muhammad Farooq")
+        // formdata.append('father_name', "Muhammad Ashraf")
+        // formdata.append('pic',pic)
+        // formdata.append('birth', document.getElementById("date").value)
+        // formdata.append('gender', 1)
+        // formdata.append('mbl_num', "0301-6070981")
+        // formdata.append('religion', "Islam")
+        // formdata.append('roll_num', "13")
+        // formdata.append('section', "Iqbal")
+        // formdata.append('class_id', "16")
 
         //P1-Schoolid
 
-        formdata.append("sessionid", "x8tl97z2ah78e713d0orjtpq23utnjf2")
+        formdata.append("sessionid", "9xbqd8wchqk12g8w3gew2yj3kqzr8tt1")
 
-        fetch('/reg/student/', {
+        fetch('/reg/school/logo/', {
             headers: {
                 "X-CSRFToken": getCookie("csrftoken")
             },

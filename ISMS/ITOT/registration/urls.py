@@ -14,7 +14,7 @@ urlpatterns = [
 #********************* School APIs ************************ 
 
     path('school/', school_views.register_school, name="register_school"),
-    path('school/logo/update/', school_views.update_logo, name="update_logo"),
+    path('school/logo/', school_views.update_logo, name="update_logo"),
     path('school/show/apps/', school_views.show_school_applications, name="show_school_applications"),
     path('school/show/details/', school_views.show_specific_school, name="show_specific_school"),
     path('school/make/schedule/', school_views.make_schedule, name="make_schedule"),
