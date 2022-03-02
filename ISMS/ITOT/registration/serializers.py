@@ -114,7 +114,32 @@ class ser_show_schl(serializers.Serializer):
     classes = ser_reg_classes(many=True)
 
 
+class ser_det_schl(serializers.Serializer):
+    user_name = serializers.CharField(max_length=100)
+    landline = serializers.CharField(max_length=15)
+    designation = serializers.CharField(max_length=25)
+
+    name = serializers.CharField(max_length=60)
+    email = serializers.EmailField(allow_null=True)
+    province =  serializers.CharField(max_length=30)
+    tehsil =  serializers.CharField(max_length=30)
+    city =  serializers.CharField(max_length=30)
+    web = serializers.URLField(allow_null=True)
+    type =  serializers.IntegerField(default=0)                                       # 0 for male, 1 for female, 2 for co-education
+    play_area = serializers.BooleanField(default=False)                               # false for no playarea
+    status_of_property = serializers.BooleanField(default=False)                      # flase means rented
+    area =  serializers.FloatField(default=0)                                         # total area of school in numbers
+    total_stu =  serializers.IntegerField(default=0)
+    address = serializers.CharField(max_length=150)
+    logo = serializers.ImageField(allow_null=True)
+
+    pic1 = serializers.ImageField(allow_null=True)
+    pic2 = serializers.ImageField(allow_null=True)
+    pic3 = serializers.ImageField(allow_null=True)
+
+
 class ser_srch_school(serializers.Serializer):
+    id = serializers.IntegerField()
     logo = serializers.CharField(max_length=150,allow_blank=True)
     name = serializers.CharField(max_length=60)
     address = serializers.CharField(max_length=150)

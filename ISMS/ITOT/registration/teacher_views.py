@@ -122,6 +122,7 @@ def approve_teacher_application(request):
             user.save()
             appl.status = 1
             appl.save()
+            school.reg_teachers = school.reg_teachers + 1
             user_name = appl.user.username.title()
             school_name = school.name.title()
             detail = "You can now register students in classes assigned to you by Admin."

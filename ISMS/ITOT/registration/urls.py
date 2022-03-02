@@ -23,6 +23,7 @@ urlpatterns = [
     path('school/rej/', school_views.reject_school, name="reject_school"),
     path('school/app/', school_views.approve_school, name="approve_school"),
     path('school/list/', school_views.schl_list, name="show_school_list"),
+    path('school/detail/', school_views.searched_school_detail, name="searched_school_detail"),
 
 #********************* General User APIs *******************
 

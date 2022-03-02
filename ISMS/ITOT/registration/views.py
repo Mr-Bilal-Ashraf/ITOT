@@ -68,7 +68,10 @@ def remove_all_sessions(id):
 
 @api_view(['GET'])
 def check(request):
-    return render(request, 'registration/check.html')
+    print(request.COOKIES)
+    res = render(request, 'registration/check.html')
+    res.set_cookie("a","hy")
+    return res
 
 
 @api_view(['GET'])

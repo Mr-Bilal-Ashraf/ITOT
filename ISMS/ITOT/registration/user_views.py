@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.contrib.sessions.models import Session
 
 from rest_framework.decorators import api_view
@@ -60,7 +59,7 @@ def sign_up(request):
                 result["status"] = 3                                                            #username already used
         return Response(result)
     else:
-        return Response({'x': 1})                                                               #data not valid
+        return Response({'status': 4})                                                               #data not valid
 
 
 @api_view(['GET'])
@@ -206,7 +205,7 @@ def update_profile(request):
             user.save()
             return Response({'status':1})
         else:
-            return Response({'status':data.errors})
+            return Response({'status':0})
             # return Response({'status':0})
     else:
         return Response({'is_logged_in':0})
@@ -228,6 +227,10 @@ def get_profile(request):
     if user is not None:
         if user.is_authenticated:
             data = {}
+            if user.user_info.mbl_num != None:
+                data["completed"] = 1
+            else:
+                data["completed"] = 0
             data["name"]=user.first_name
             data["father_name"]=user.last_name
             ser_user_info = ser_update_profile(User_Info.objects.get(user=user))
