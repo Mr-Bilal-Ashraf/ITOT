@@ -1,5 +1,3 @@
-from django.shortcuts import render
-from django.contrib.sessions.models import Session
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -18,6 +16,7 @@ from .views import CLASSES
 
 @api_view(['POST'])
 def register_teacher(request):
+    print(request.data)
     data = {"max_teachers": 1}
     schl = School.objects.get(pk=request.data["schl_id"])
     user = get_user_from_session(request.data["sessionid"])
@@ -123,6 +122,7 @@ def approve_teacher_application(request):
             appl.status = 1
             appl.save()
             school.reg_teachers = school.reg_teachers + 1
+            school.save()
             user_name = appl.user.username.title()
             school_name = school.name.title()
             detail = "You can now register students in classes assigned to you by Admin."

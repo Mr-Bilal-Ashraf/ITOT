@@ -79,9 +79,19 @@ def confirm_code(request,id,code):
 def sign_in(request):
     data = ser_log_in(data=request.data)
     if data.is_valid():
+        a={"user":False,"password":False,"activated":False}
         data = data.data
         username = data["username"].lower()
         password = data["password"]
+        try:
+            user = User.objects.get(username=username)
+            a["user"] = True
+        except:
+            return Response(a)
+        else:
+            a["password"] = user.check_password(password)
+            a["activated"] = user.is_active
+
         user = auth.authenticate(request, username=username, password=password)
 
         if user is not None:
@@ -94,7 +104,7 @@ def sign_in(request):
             else:
                 return Response({'status': 3})                   # user is logged in at more than two places
         else:
-            return Response({'status': 0})               #not activated OR user not found. check your email,username and password
+            return Response(a)               #not activated OR user not found. check your email,username and password
     else:
         return Response({'status': 2})                   #given data has problems
 
@@ -206,7 +216,6 @@ def update_profile(request):
             return Response({'status':1})
         else:
             return Response({'status':0})
-            # return Response({'status':0})
     else:
         return Response({'is_logged_in':0})
 
