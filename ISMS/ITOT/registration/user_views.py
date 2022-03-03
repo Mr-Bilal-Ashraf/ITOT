@@ -22,9 +22,9 @@ def sign_up(request):
     if data.is_valid():
         data = data.data
         if User.objects.filter(username=data["username"]).exists():
-            result["username"] = 0                                                      #username already exists
+            result["username"] = 0                                                             #username already exists
         if User.objects.filter(email=data["email"]).exists():
-            result["email"] = 0                                                         #email already exists
+            result["email"] = 0                                                                #email already exists
 
         if result["username"] == 1 and result["email"] == 1:
             user = User.objects.create_user(username=data["username"], email=data["email"], password=data["password"], is_active=False)
@@ -39,7 +39,7 @@ def sign_up(request):
             from_email = "From <info.itotpk@gmail.com>"
             to_email = data["email"]
             send_mail("Email Confirmation...", plain_message, from_email, [to_email], html_message= html_message) 
-            result["status"] = 1                                                           # account created succesfully
+            result["status"] = 1                                                                #account created succesfully
         else:
             if result["email"]==0:
                 user = User.objects.get(email=data["email"])
@@ -59,7 +59,7 @@ def sign_up(request):
                 result["status"] = 3                                                            #username already used
         return Response(result)
     else:
-        return Response({'status': 4})                                                               #data not valid
+        return Response({'status': 4})                                                          #data not valid
 
 
 @api_view(['GET'])
@@ -84,7 +84,10 @@ def sign_in(request):
         username = data["username"].lower()
         password = data["password"]
         try:
-            user = User.objects.get(username=username)
+            if "@" in username:
+                user = User.objects.get(email=username)
+            else:
+                user = User.objects.get(username=username)
             a["user"] = True
         except:
             return Response(a)
@@ -102,11 +105,11 @@ def sign_in(request):
                 
                 return Response({'status': 1, "sessionid":request.session.session_key, "role": user.user_info.role})               #logined
             else:
-                return Response({'status': 3})                   # user is logged in at more than two places
+                return Response({'status': 3})                                              # user is logged in at more than two places
         else:
-            return Response(a)               #not activated OR user not found. check your email,username and password
+            return Response(a)                                                              #not activated OR user not found. check your email,username and password
     else:
-        return Response({'status': 2})                   #given data has problems
+        return Response({'status': 2})                                                      #given data has problems
 
 
 @api_view(['POST'])
@@ -117,11 +120,11 @@ def sign_out(request):
             Session.objects.get(session_key=request.data["sessionid"]).delete()             # to log out from only the where the request came from  
             # user.user_info.logged_ins -= 1
             # user.user_info.save()
-            return Response({'status':1})                    #logout
+            return Response({'status':1})                                                   #logout
         else:
             return Response({'status':0})
     except:
-        return Response({'status':0})                     #error
+        return Response({'status':0})                                                       #error
 
 
 @api_view(['POST'])
@@ -129,14 +132,14 @@ def sign_out_all(request):
     try:
         user = get_user_from_session(request.data["sessionid"])
         if user is not None:
-            remove_all_sessions(user.id)                                                  # logout the user from all computers
+            remove_all_sessions(user.id)                                                    # logout the user from all computers
             user.user_info.logged_ins = 0
             user.user_info.save()
-            return Response({'status':1})                    #logout
+            return Response({'status':1})                                                   #logout
         else:
             return Response({'status':0})
     except:
-        return Response({'status':0})                     #error
+        return Response({'status':0})                                                       #error
 
 
 @api_view(['POST'])
@@ -187,16 +190,15 @@ def update_password(request):
             if user.check_password(data["username"]):
                 user.set_password(data["password"])
                 user.save()
-                return Response({'status':1})                                                                           #password updated
+                return Response({'status':1})                                                                       #password updated
             else:
-                return Response({'status':0})                                                                           #wrong password
+                return Response({'status':0})                                                                       #wrong password
         else:
             return Response({'status':0})
     else:
         return Response({'status':2})                                                                               #invalid data
 
 
-# @parser_classes([MultiPartParser, FormParser])
 @api_view(['POST'])
 def update_profile(request):
     name=request.data['name']
@@ -240,6 +242,7 @@ def get_profile(request):
                 data["completed"] = 1
             else:
                 data["completed"] = 0
+            data["username"] =user.username
             data["name"]=user.first_name
             data["father_name"]=user.last_name
             ser_user_info = ser_update_profile(User_Info.objects.get(user=user))
