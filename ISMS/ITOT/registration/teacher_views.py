@@ -16,7 +16,6 @@ from .views import CLASSES
 
 @api_view(['POST'])
 def register_teacher(request):
-    print(request.data)
     data = {"max_teachers": 1}
     schl = School.objects.get(pk=request.data["schl_id"])
     user = get_user_from_session(request.data["sessionid"])

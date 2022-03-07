@@ -34,7 +34,7 @@ urlpatterns = [
     path('<int:id>/conf/code/<str:code>/', user_views.confirm_code, name="confirm_code"),                        #link in email to verify account
     path('forgot/password/', user_views.forgot_password, name="forgot_password"),                                #get email OR username and send reset password email
     path('forgot/password/reset/', user_views.forgot_password_reset, name="forgot_password_reset"),              #get code and new password to reset password
-    path('update/password/', user_views.update_password, name="update_password"),                                #update password from settings, get old & new password
+    path('password/update/', user_views.update_password, name="update_password"),                                #update password from settings, get old & new password
     path('profile/update/', user_views.update_profile, name="update_profile"),                                   #will update profile data like image and name etc
     path('is/complete/', user_views.is_complete, name="is_complete"),                                            #check is the user has setup his profile or not 
     path('profile/get/', user_views.get_profile, name="get_profile"),
@@ -42,16 +42,16 @@ urlpatterns = [
 #*********************** Teacher APIs ************************ 
 
     path('teacher/', teacher_views.register_teacher, name="register_teacher"),
-    path('teachers/apps/', teacher_views.teachers_applications, name="teachers_applications"),
+    path('teacher/apps/', teacher_views.teachers_applications, name="teachers_applications"),
+    path('teacher/rej/', teacher_views.reject_teacher_application, name="reject_teacher_application"),           
+    path('teacher/app/', teacher_views.approve_teacher_application, name="approve_teacher_application"),   
     path('my/classes/', teacher_views.my_classes, name="class_names_list"),                                      #show classes to school admins
-    path('rej/teacher/', teacher_views.reject_teacher_application, name="reject_teacher_application"),           
-    path('app/teacher/', teacher_views.approve_teacher_application, name="approve_teacher_application"),         
     path('student/', teacher_views.register_student, name="register_student"),
-    path('students/apps/', teacher_views.students_applications, name="students_applications"),
-    path('app/student/', teacher_views.app_student, name="approve_student"),
-    path('rej/student/', teacher_views.rej_student, name="reject_student"),
-    path('val/student/', teacher_views.validate_student, name="validate_student"),
-    path('act/student/', teacher_views.activate_student, name="activate_student"),
+    path('student/apps/', teacher_views.students_applications, name="students_applications"),
+    path('student/app/', teacher_views.app_student, name="approve_student"),
+    path('student/rej/', teacher_views.rej_student, name="reject_student"),
+    path('student/val/', teacher_views.validate_student, name="validate_student"),
+    path('student/act/', teacher_views.activate_student, name="activate_student"),
 
 
     # path('forgot/password/reset/', teacher_views.forgot_password_reset, name="forgot_password_reset"),

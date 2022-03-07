@@ -12,20 +12,19 @@ from .models import Schedule, School, School_Admins, Classes, Applications, Scl_
 from .serializers import ser_logo, ser_schedules, ser_schl_apps, ser_srch_school, ser_reg_classes, ser_reg_school, ser_reg_admin, ser_show_schl, ser_det_schl
 
 
-
-
-
 @api_view(['POST'])
 def register_school(request):
-    result = {"role": 0, "admin": 0, 'status': 0}
+    result = {"role": 0, "admin": 0, 'status': 0, "applications": 0}
     user = get_user_from_session(request.data["sessionid"])
+    result["applications"] = len(
+        Applications.objects.filter(user=user, role=1))
     if user is not None:
         # ROLE 0 => user, 1 => student, 2 => teacher, 3 => admin
         result["role"] = user.user_info.role
         # admin = 0 means user holds no school
         result["admin"] = 1 if School_Admins.objects.filter(user=user) else 0
 
-        if result["admin"] == 0 and result["role"] == 0:
+        if result["admin"] == 0 and result["role"] == 0 and result["applications"] == 0:
             ser_school = ser_reg_school(data=request.data["school"])
             ser_admin = ser_reg_admin(data=request.data["admin"])
             ser_classes = ser_reg_classes(
@@ -72,7 +71,7 @@ def register_school(request):
         return Response({"is_logged_in": 0})
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def show_school_applications(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
@@ -165,11 +164,13 @@ def make_schedule(request):
         time_to_send[0] -= 12
     time_to_send = f"{time_to_send[0]}:{time_to_send[1]} {am}"
 
-    html_message = render_to_string('registration/schedule.html', {'date':date_to_send, 'time':time_to_send})
+    html_message = render_to_string(
+        'registration/schedule.html', {'date': date_to_send, 'time': time_to_send})
     plain_message = strip_tags(html_message)
     from_email = "From <info.itotpk@gmail.com>"
     to_email = schl.school_admins.user.email
-    send_mail("ITOT Visiting Schedule...", plain_message, from_email, [to_email], html_message= html_message)
+    send_mail("ITOT Visiting Schedule...", plain_message,
+              from_email, [to_email], html_message=html_message)
     return Response({"a": 1})
 
 
@@ -191,11 +192,13 @@ def approve_school(request):
             except:
                 pass
 
-            html_message = render_to_string('registration/app_school.html', {'l_k':l_k})
+            html_message = render_to_string(
+                'registration/app_school.html', {'l_k': l_k})
             plain_message = strip_tags(html_message)
             from_email = "From <info.itotpk@gmail.com>"
             to_email = schl.school_admins.user.email
-            send_mail("School Registration Status...", plain_message, from_email, [to_email], html_message= html_message)
+            send_mail("School Registration Status...", plain_message,
+                      from_email, [to_email], html_message=html_message)
             return Response({'status': l_k})
         else:
             return Response({'admin': 0})
@@ -212,11 +215,13 @@ def reject_school(request):
             schl_id = request.data["schl_id"]
             schl = School.objects.get(pk=schl_id)
             schl.delete()
-            html_message = render_to_string('registration/rej_school.html', {'reason':reason})
+            html_message = render_to_string(
+                'registration/rej_school.html', {'reason': reason})
             plain_message = strip_tags(html_message)
             from_email = "From <info.itotpk@gmail.com>"
             to_email = schl.school_admins.user.email
-            send_mail("School Registration Status...", plain_message, from_email, [to_email], html_message= html_message)
+            send_mail("School Registration Status...", plain_message,
+                      from_email, [to_email], html_message=html_message)
             return Response({'status': 1})
         else:
             return Response({'admin': 0})
@@ -252,7 +257,7 @@ def schl_list(request):
         srch_query[key] = value.lower()
     srch_query["is_active"] = True
     resulted_schools = School.objects.filter(
-        **srch_query).values("id","logo", "name", "address")
+        **srch_query).values("id", "logo", "name", "address")
     da = []
     for a in resulted_schools:
         d = {}
@@ -275,7 +280,8 @@ def searched_school_detail(request):
         schl_id = request.data["schl_id"]
         scl = School.objects.get(pk=schl_id)
     except:
-        return Response({'status': 0})                                              # no school
+        # no school
+        return Response({'status': 0})
     else:
         data["user_name"] = scl.school_admins.user.first_name
         data["landline"] = scl.school_admins.landline
@@ -293,7 +299,6 @@ def searched_school_detail(request):
         data["total_stu"] = scl.total_stu
         data["logo"] = scl.logo
         data["address"] = scl.address
-        
 
         scl_imgs = scl.scl_images_set.all()
         count = 1
@@ -305,8 +310,7 @@ def searched_school_detail(request):
         return Response({'schoolData': school_data.data})
 
 
-
-@api_view(['GET'])
+@api_view(['POST'])
 def all_schedules(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:

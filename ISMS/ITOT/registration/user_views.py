@@ -244,6 +244,7 @@ def get_profile(request):
                 data["completed"] = 0
             data["username"] =user.username
             data["name"]=user.first_name
+            data["email"]=user.email
             data["father_name"]=user.last_name
             ser_user_info = ser_update_profile(User_Info.objects.get(user=user))
             data["info"] = ser_user_info.data
