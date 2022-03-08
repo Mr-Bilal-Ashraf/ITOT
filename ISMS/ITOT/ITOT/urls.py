@@ -8,6 +8,7 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('reg/', include('registration.urls')),
+    path('', include('dashboards.urls')),
 ]
 
 

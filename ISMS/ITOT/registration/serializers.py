@@ -86,8 +86,6 @@ class ser_schl_apps(serializers.Serializer):
 
 class ser_show_schl(serializers.Serializer):
     user_name = serializers.CharField(max_length=100)
-    father_name = serializers.CharField(max_length=100)
-    pic = serializers.ImageField()
     mbl_num = serializers.CharField(max_length=12, allow_null=True)
     landline = serializers.CharField(max_length=15)
     designation = serializers.CharField(max_length=25)

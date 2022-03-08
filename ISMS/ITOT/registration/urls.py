@@ -4,9 +4,6 @@ from . import views, school_views, user_views, teacher_views
 urlpatterns = [
 
 
-    # path('forgot/password/reset/', views.forgot_password_reset, name="forgot_password_reset"),
-
-
     path('check/', views.check, name="check"),
     path('del/', views.del_user, name="del_user"),
 
@@ -15,13 +12,6 @@ urlpatterns = [
 
     path('school/', school_views.register_school, name="register_school"),
     path('school/logo/', school_views.update_logo, name="update_logo"),
-    path('school/show/apps/', school_views.show_school_applications, name="show_school_applications"),
-    path('school/show/details/', school_views.show_specific_school, name="show_specific_school"),
-    path('school/make/schedule/', school_views.make_schedule, name="make_schedule"),
-    path('school/all/schedules/', school_views.all_schedules, name="all_schedules"),
-    path('school/range/schedules/', school_views.schedules_range, name="schedules_range"),
-    path('school/rej/', school_views.reject_school, name="reject_school"),
-    path('school/app/', school_views.approve_school, name="approve_school"),
     path('school/list/', school_views.schl_list, name="show_school_list"),
     path('school/detail/', school_views.searched_school_detail, name="searched_school_detail"),
 

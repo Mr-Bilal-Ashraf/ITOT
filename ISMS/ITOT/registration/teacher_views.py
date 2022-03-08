@@ -1,4 +1,5 @@
 
+from datetime import datetime
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -213,6 +214,7 @@ def app_student(request):
             city_name = appl.school.city.split("-")[1]
             class_name = CLASSES[appl.class_name.name]
             appl.user.students.G_ID = f"{schl_abbr}-{city_name}-{class_name}-R{appl.user.id:03}"
+            appl.user.students.app_date = datetime.now()
             appl.user.students.save()
             appl.status = 1
             appl.save()

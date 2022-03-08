@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'registration.apps.RegistrationConfig',
+    'dashboards.apps.DashboardsConfig',
     'django_cleanup.apps.CleanupConfig',
     'corsheaders'
 ]

@@ -28,6 +28,7 @@ class School(models.Model):
     reg_teachers = models.IntegerField(default=0)
     l_key = models.CharField(max_length=15, blank=True, null=True)
     is_active = models.BooleanField(default=False)
+    app_date = models.DateField(blank=True, null=True)
 
 
 class Scl_images(models.Model):
@@ -49,6 +50,7 @@ class Teachers(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     school = models.ForeignKey(School, on_delete=models.CASCADE)
     classes = models.ManyToManyField(Classes)
+    app_date = models.DateField(auto_now_add=True)
 
 
 class Applications(models.Model):
@@ -87,6 +89,7 @@ class Students(models.Model):
     section = models.CharField(max_length=30, blank=True, null=True)
     roll_num = models.CharField(max_length=3)
     registered_by = models.ForeignKey(Teachers, on_delete=models.SET_NULL, null=True, blank=True)
+    app_date = models.DateField(blank=True, null=True)
     
 
 class Schedule(models.Model):
