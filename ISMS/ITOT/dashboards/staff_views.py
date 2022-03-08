@@ -1,5 +1,5 @@
 import pytz
-from datetime import datetime
+import datetime
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
@@ -109,7 +109,7 @@ def make_schedule(request):
                 date_to_send = date.copy()
                 time = list(map(int, data[1].split(":")))
                 time_to_send = time.copy()
-                date = datetime(date[0], date[1], date[2],
+                date = datetime.datetime(date[0], date[1], date[2],
                                 time[0], time[1], tzinfo=pytz.UTC)
                 Schedule.objects.update_or_create(school=schl, defaults={'schedule': date})
                 date_to_send = f"{date_to_send[2]}-{MONTHS[date_to_send[1]-1]}-{date_to_send[0]}"
@@ -143,7 +143,7 @@ def approve_school(request):
             schl = School.objects.get(pk=request.data["schl_id"])
             l_k = schl.l_key
             schl.is_active = True
-            schl.app_date = datetime.now()
+            schl.app_date = datetime.datetime.now()
             schl.save()
             Applications.objects.filter(school=schl, role=0).update(status=1)
             user__info = schl.school_admins.user.user_info
@@ -197,9 +197,9 @@ def reject_school(request):
 def today_schedules(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.is_superuser:
+        if user.user_info.role in [4,5]:
             data_to_send = []
-            data = Schedule.objects.all()
+            data = Schedule.objects.filter(schedule__gt=datetime.date.today(), schedule__lt=datetime.date.today() + datetime.timedelta(days=1))
             for a in data:
                 b = {}
                 b["date"] = a.schedule
@@ -217,7 +217,7 @@ def today_schedules(request):
             else:
                 return Response({'status': 0})
         else:
-            return Response({'admin': 0})
+            return Response({'status': 2})
     else:
         return Response({"is_logged_in": 0})
 
@@ -226,7 +226,7 @@ def today_schedules(request):
 def all_schedules(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.is_superuser:
+        if user.user_info.role in [4,5]:
             data_to_send = []
             data = Schedule.objects.all()
             for a in data:
@@ -246,7 +246,7 @@ def all_schedules(request):
             else:
                 return Response({'status': 0})
         else:
-            return Response({'admin': 0})
+            return Response({'status': 2})
     else:
         return Response({"is_logged_in": 0})
 
@@ -255,9 +255,9 @@ def all_schedules(request):
 def passed_schedules(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.is_superuser:
+        if user.user_info.role in [4,5]:
             data_to_send = []
-            data = Schedule.objects.all()
+            data = Schedule.objects.filter(schedule__lt=datetime.date.today())
             for a in data:
                 b = {}
                 b["date"] = a.schedule
@@ -275,7 +275,7 @@ def passed_schedules(request):
             else:
                 return Response({'status': 0})
         else:
-            return Response({'admin': 0})
+            return Response({'status': 2})
     else:
         return Response({"is_logged_in": 0})
 
@@ -284,7 +284,7 @@ def passed_schedules(request):
 def schedules_range(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.is_superuser:
+        if user.user_info.role in [4,5]:
             in_date = request.data["in_date"]
             out_date = request.data["out_date"]
             data_to_send = []
@@ -302,10 +302,13 @@ def schedules_range(request):
 
             data = ser_schedules(data=data_to_send, many=True)
             if data.is_valid():
-                return Response({'data': data.data})
+                return Response({'status': data.data})
             else:
-                return Response({'data': 0})
+                return Response({'status': 0})
         else:
-            return Response({'admin': 0})
+            return Response({'status': 2})
     else:
         return Response({"is_logged_in": 0})
+
+
+#************************* Teachers *******************************
