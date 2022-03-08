@@ -68,7 +68,7 @@ class User_Info(models.Model):
     gender = models.BooleanField(default=True)                           #true means "male" OR false means "female"
     mbl_num = models.CharField(max_length=12, null=True, blank=True)
     religion = models.CharField(max_length=20, default="Islam")
-    role = models.IntegerField(default=0)                                 # 0 => user, 1 => student, 2 => teacher, 3 => admin
+    role = models.IntegerField(default=0)                                 # 0 => user, 1 => student, 2 => teacher, 3 => admin, 4 => staff, 5 => CEO
     logged_ins = models.IntegerField(default=0)
 
 

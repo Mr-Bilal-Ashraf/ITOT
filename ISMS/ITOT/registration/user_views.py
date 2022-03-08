@@ -103,7 +103,7 @@ def sign_in(request):
                 # user.user_info.logged_ins += 1
                 # user.user_info.save()
                 
-                return Response({'status': 1, "sessionid":request.session.session_key, "role": user.user_info.role})               #logined
+                return Response({'status': 1, "sessionid":request.session.session_key})               #logined
             else:
                 return Response({'status': 3})                                              # user is logged in at more than two places
         else:

@@ -145,33 +145,35 @@ def show_specific_school(request):
 
 @api_view(['POST'])
 def make_schedule(request):
-    print(request.COOKIES)
-    data = request.data["date"]
-    schl = request.data["schl_id"]
-    schl = School.objects.get(pk=schl)
-    data = data.split("T")
-    date = list(map(int, data[0].split("-")))
-    date_to_send = date.copy()
-    time = list(map(int, data[1].split(":")))
-    time_to_send = time.copy()
-    date = datetime(date[0], date[1], date[2],
-                    time[0], time[1], tzinfo=pytz.UTC)
-    Schedule.objects.update_or_create(school=schl, defaults={'schedule': date})
-    date_to_send = f"{date_to_send[2]}-{MONTHS[date_to_send[1]-1]}-{date_to_send[0]}"
-    am = "AM"
-    if time_to_send[0] > 12:
-        am = "PM"
-        time_to_send[0] -= 12
-    time_to_send = f"{time_to_send[0]}:{time_to_send[1]} {am}"
+    try:
+        data = request.data["date"]
+        schl = request.data["schl_id"]
+        schl = School.objects.get(pk=schl)
+        data = data.split("T")
+        date = list(map(int, data[0].split("-")))
+        date_to_send = date.copy()
+        time = list(map(int, data[1].split(":")))
+        time_to_send = time.copy()
+        date = datetime(date[0], date[1], date[2],
+                        time[0], time[1], tzinfo=pytz.UTC)
+        Schedule.objects.update_or_create(school=schl, defaults={'schedule': date})
+        date_to_send = f"{date_to_send[2]}-{MONTHS[date_to_send[1]-1]}-{date_to_send[0]}"
+        am = "AM"
+        if time_to_send[0] > 12:
+            am = "PM"
+            time_to_send[0] -= 12
+        time_to_send = f"{time_to_send[0]}:{time_to_send[1]} {am}"
 
-    html_message = render_to_string(
-        'registration/schedule.html', {'date': date_to_send, 'time': time_to_send})
-    plain_message = strip_tags(html_message)
-    from_email = "From <info.itotpk@gmail.com>"
-    to_email = schl.school_admins.user.email
-    send_mail("ITOT Visiting Schedule...", plain_message,
-              from_email, [to_email], html_message=html_message)
-    return Response({"a": 1})
+        html_message = render_to_string(
+            'registration/schedule.html', {'date': date_to_send, 'time': time_to_send})
+        plain_message = strip_tags(html_message)
+        from_email = "From <info.itotpk@gmail.com>"
+        to_email = schl.school_admins.user.email
+        send_mail("ITOT Visiting Schedule...", plain_message,
+                from_email, [to_email], html_message=html_message)
+        return Response({"status": 1})
+    except:
+        return Response({"status": 0})
 
 
 @api_view(['POST'])
@@ -199,9 +201,9 @@ def approve_school(request):
             to_email = schl.school_admins.user.email
             send_mail("School Registration Status...", plain_message,
                       from_email, [to_email], html_message=html_message)
-            return Response({'status': l_k})
+            return Response({'status': 1})
         else:
-            return Response({'admin': 0})
+            return Response({'status': 0})                   #not a super user
     else:
         return Response({"is_logged_in": 0})
 
@@ -244,7 +246,7 @@ def update_logo(request):
             return Response({"status": 1})
         else:
             print(data.errors)
-            return Response({"status": data.errors})
+            return Response({"status": 0})
     else:
         return Response({"is_logged_in": 0})
 
@@ -252,25 +254,27 @@ def update_logo(request):
 @api_view(['POST'])
 def schl_list(request):
     srch_query = {}
+    try:
+        for key, value in request.data.items():
+            srch_query[key] = value.lower()
+        srch_query["is_active"] = True
+        resulted_schools = School.objects.filter(
+            **srch_query).values("id", "logo", "name", "address")
+        da = []
+        for a in resulted_schools:
+            d = {}
+            for key, value in a.items():
+                if key == "logo" and len(value) != 0:
+                    value = "/media/"+value
+                d[key] = value
+            da.append(d)
 
-    for key, value in request.data.items():
-        srch_query[key] = value.lower()
-    srch_query["is_active"] = True
-    resulted_schools = School.objects.filter(
-        **srch_query).values("id", "logo", "name", "address")
-    da = []
-    for a in resulted_schools:
-        d = {}
-        for key, value in a.items():
-            if key == "logo" and len(value) != 0:
-                value = "/media/"+value
-            d[key] = value
-        da.append(d)
-
-    resulted_schools = ser_srch_school(data=da, many=True)
-    if resulted_schools.is_valid():
-        return Response({"schools": resulted_schools.data})
-    return Response({"status": 0})
+        resulted_schools = ser_srch_school(data=da, many=True)
+        if resulted_schools.is_valid():
+            return Response({"schools": resulted_schools.data})
+        return Response({"status": 0})
+    except:
+        return Response({"status": 0})
 
 
 @api_view(['POST'])
@@ -330,9 +334,9 @@ def all_schedules(request):
 
             data = ser_schedules(data=data_to_send, many=True)
             if data.is_valid():
-                return Response({'data': data.data})
+                return Response({'status': data.data})
             else:
-                return Response({'data': 0})
+                return Response({'status': 0})
         else:
             return Response({'admin': 0})
     else:
