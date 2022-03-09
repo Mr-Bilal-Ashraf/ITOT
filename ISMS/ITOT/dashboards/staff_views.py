@@ -397,3 +397,78 @@ def school_filtered_teachers(request):
 #************************* Students *******************************
 
 
+@api_view(['POST'])
+def sample_students(request):
+    user = get_user_from_session(request.data["sessionid"])
+    if user is not None:
+        if user.user_info.role in [4,5]:
+            data_to_send=[]
+            stu = Students.objects.order_by('user').reverse()[0:5]
+            for a in stu:
+                data={}
+                data["schl_name"] = a.school.name
+                data["name"] = a.user.first_name
+                data["pic"] = str(a.user.user_info.pic)
+                if len(data["pic"]) != 0:
+                    data["pic"] = "/media/"+data["pic"]
+                data_to_send.append(data)
+            return Response(data_to_send)
+        else:
+            return Response({'status': 2})
+    else:
+        return Response({"is_logged_in": 0})
+
+
+@api_view(['POST'])
+def all_students(request):
+    user = get_user_from_session(request.data["sessionid"])
+    if user is not None:
+        if user.user_info.role in [4,5]:
+            data_to_send=[]
+            stu = Students.objects.order_by('user').reverse()
+            for a in stu:
+                data={}
+                data["schl_name"] = a.school.name
+                data["name"] = a.user.first_name
+                data["pic"] = str(a.user.user_info.pic)
+                if len(data["pic"]) != 0:
+                    data["pic"] = "/media/"+data["pic"]
+                data_to_send.append(data)
+
+            paginator = PageNumberPagination()
+            paginator.page_size = 10
+            result_page = paginator.paginate_queryset(data_to_send, request)
+
+            return paginator.get_paginated_response(result_page)
+        else:
+            return Response({'status': 2})
+    else:
+        return Response({"is_logged_in": 0})
+
+
+@api_view(['POST'])
+def school_filtered_students(request):
+    user = get_user_from_session(request.data["sessionid"])
+    if user is not None:
+        if user.user_info.role in [4,5]:
+            data_to_send=[]
+            schl = School.objects.get(name=request.data["schl_name"])
+            stu = Students.objects.filter(school=schl).order_by('user').reverse()
+            for a in stu:
+                data={}
+                data["schl_name"] = a.school.name
+                data["name"] = a.user.first_name
+                data["pic"] = str(a.user.user_info.pic)
+                if len(data["pic"]) != 0:
+                    data["pic"] = "/media/"+data["pic"]
+                data_to_send.append(data)
+
+            paginator = PageNumberPagination()
+            paginator.page_size = 10
+            result_page = paginator.paginate_queryset(data_to_send, request)
+
+            return paginator.get_paginated_response(result_page)
+        else:
+            return Response({'status': 2})
+    else:
+        return Response({"is_logged_in": 0})
