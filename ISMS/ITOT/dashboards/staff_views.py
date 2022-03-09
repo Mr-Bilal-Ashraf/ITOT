@@ -10,7 +10,7 @@ from rest_framework.pagination import PageNumberPagination
 
 
 from registration.views import get_user_from_session, MONTHS
-from registration.models import Schedule, School, Applications
+from registration.models import Schedule, School, Applications, Teachers, Students
 from registration.serializers import ser_schedules, ser_schl_apps, ser_show_schl
 
 
@@ -143,7 +143,7 @@ def approve_school(request):
             schl = School.objects.get(pk=request.data["schl_id"])
             l_k = schl.l_key
             schl.is_active = True
-            schl.app_date = datetime.datetime.now()
+            schl.app_date = datetime.date.today()
             schl.save()
             Applications.objects.filter(school=schl, role=0).update(status=1)
             user__info = schl.school_admins.user.user_info
@@ -312,3 +312,88 @@ def schedules_range(request):
 
 
 #************************* Teachers *******************************
+
+@api_view(['POST'])
+def sample_teachers(request):
+    user = get_user_from_session(request.data["sessionid"])
+    if user is not None:
+        if user.user_info.role in [4,5]:
+            data_to_send=[]
+            teach = Teachers.objects.order_by('id').reverse()[0:5]
+            for a in teach:
+                data={}
+                data["schl_name"] = a.school.name
+                data["name"] = a.user.first_name
+                data["pic"] = str(a.user.user_info.pic)
+                if len(data["pic"]) != 0:
+                    data["pic"] = "/media/"+data["pic"]
+                data_to_send.append(data)
+            return Response(data_to_send)
+        else:
+            return Response({'status': 2})
+    else:
+        return Response({"is_logged_in": 0})
+
+
+@api_view(['POST'])
+def all_teachers(request):
+    user = get_user_from_session(request.data["sessionid"])
+    if user is not None:
+        if user.user_info.role in [4,5]:
+            data_to_send=[]
+            teach = Teachers.objects.order_by('id').reverse()
+            for a in teach:
+                data={}
+                data["schl_name"] = a.school.name
+                data["name"] = a.user.first_name
+                data["pic"] = str(a.user.user_info.pic)
+                if len(data["pic"]) != 0:
+                    data["pic"] = "/media/"+data["pic"]
+                data_to_send.append(data)
+
+            paginator = PageNumberPagination()
+            paginator.page_size = 10
+            result_page = paginator.paginate_queryset(data_to_send, request)
+
+            return paginator.get_paginated_response(result_page)
+        else:
+            return Response({'status': 2})
+    else:
+        return Response({"is_logged_in": 0})
+
+
+@api_view(['POST'])
+def school_filtered_teachers(request):
+    user = get_user_from_session(request.data["sessionid"])
+    if user is not None:
+        if user.user_info.role in [4,5]:
+            data_to_send=[]
+            schl = School.objects.get(name=request.data["schl_name"])
+            teach = Teachers.objects.filter(school=schl).order_by('id').reverse()
+            for a in teach:
+                data={}
+                data["schl_name"] = a.school.name
+                data["name"] = a.user.first_name
+                data["pic"] = str(a.user.user_info.pic)
+                if len(data["pic"]) != 0:
+                    data["pic"] = "/media/"+data["pic"]
+                data_to_send.append(data)
+
+            paginator = PageNumberPagination()
+            paginator.page_size = 10
+            result_page = paginator.paginate_queryset(data_to_send, request)
+
+            return paginator.get_paginated_response(result_page)
+        else:
+            return Response({'status': 2})
+    else:
+        return Response({"is_logged_in": 0})
+
+
+
+
+
+
+#************************* Students *******************************
+
+

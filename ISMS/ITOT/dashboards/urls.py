@@ -21,7 +21,23 @@ urlpatterns = [
     path('staff/range/schedules/', staff_views.schedules_range, name="schedules_range"),
 
 
-    #********* School *********
+    #********* School ************
+
+
+    #********* Teachers ***********
+
+    path('staff/sample/teachers/', staff_views.sample_teachers, name="sample_teachers"),
+    path('staff/all/teachers/', staff_views.all_teachers, name="all_teachers"),
+    path('staff/filter/teachers/', staff_views.school_filtered_teachers, name="filtered_teachers"),
+
+
+
+
+    #********* Students ***********
+
+    path('staff/sample/students/', staff_views.sample_students, name="sample_students"),
+    path('staff/all/students/', staff_views.all_students, name="all_students"),
+    path('staff/filter/students/', staff_views.school_filtered_students, name="filtered_students"),
 
 
 
