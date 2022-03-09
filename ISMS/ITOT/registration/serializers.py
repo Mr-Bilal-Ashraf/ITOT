@@ -19,7 +19,7 @@ class ser_forgot_password(serializers.Serializer):
 class ser_update_profile(serializers.ModelSerializer):
     class Meta:
         model = User_Info
-        exclude = ['user']
+        exclude = ['user','logged_ins']
 
     def update(self, user):
         data = {}

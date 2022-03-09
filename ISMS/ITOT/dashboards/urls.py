@@ -5,40 +5,40 @@ urlpatterns = [
 
 #********************* Staff Dashboard *************************
 
+    #********* School **************
+
+
+
     #********* Applications *********
 
     path('staff/show/apps/', staff_views.show_school_applications, name="show_school_applications"),
     path('staff/show/details/', staff_views.show_specific_school, name="show_specific_school"),
-    path('staff/make/schedule/', staff_views.make_schedule, name="make_schedule"),
+    path('staff/schedule/make/', staff_views.make_schedule, name="make_schedule"),
     path('staff/app/', staff_views.approve_school, name="approve_school"),
     path('staff/rej/', staff_views.reject_school, name="reject_school"),
 
     #********* Schedules *********
 
-    path('staff/today/schedules/', staff_views.today_schedules, name="today_schedules"),
-    path('staff/all/schedules/', staff_views.all_schedules, name="all_schedules"),
-    path('staff/passed/schedules/', staff_views.passed_schedules, name="passed_schedules"),
-    path('staff/range/schedules/', staff_views.schedules_range, name="schedules_range"),
-
-
-    #********* School ************
-
+    path('staff/schedule/today/', staff_views.today_schedules, name="today_schedules"),
+    path('staff/schedule/all/', staff_views.all_schedules, name="all_schedules"),
+    path('staff/schedule/passed/', staff_views.passed_schedules, name="passed_schedules"),
+    path('staff/schedule/range/', staff_views.schedules_range, name="schedules_range"),
 
     #********* Teachers ***********
 
-    path('staff/sample/teachers/', staff_views.sample_teachers, name="sample_teachers"),
-    path('staff/all/teachers/', staff_views.all_teachers, name="all_teachers"),
-    path('staff/filter/teachers/', staff_views.school_filtered_teachers, name="filtered_teachers"),
-
-
-
+    path('staff/teacher/sample/', staff_views.sample_teachers, name="sample_teachers"),
+    path('staff/teacher/all/', staff_views.all_teachers, name="all_teachers"),
+    path('staff/teacher/filter/', staff_views.school_filtered_teachers, name="filtered_teachers"),
+    path('staff/teacher/detail/', staff_views.teacher_detail, name="teacher_detail"),
 
     #********* Students ***********
 
-    path('staff/sample/students/', staff_views.sample_students, name="sample_students"),
-    path('staff/all/students/', staff_views.all_students, name="all_students"),
-    path('staff/filter/students/', staff_views.school_filtered_students, name="filtered_students"),
+    path('staff/student/sample/', staff_views.sample_students, name="sample_students"),
+    path('staff/student/all/', staff_views.all_students, name="all_students"),
+    path('staff/student/filter/', staff_views.school_filtered_students, name="filtered_students"),
+    path('staff/student/detail/', staff_views.student_detail, name="student_detail"),
 
+    #********* Dashboard ***********
 
 
 

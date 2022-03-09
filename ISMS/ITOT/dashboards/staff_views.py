@@ -10,8 +10,8 @@ from rest_framework.pagination import PageNumberPagination
 
 
 from registration.views import get_user_from_session, MONTHS
-from registration.models import Schedule, School, Applications, Teachers, Students
-from registration.serializers import ser_schedules, ser_schl_apps, ser_show_schl
+from registration.models import Schedule, School, Applications, Teachers, Students, User_Info
+from registration.serializers import ser_schedules, ser_schl_apps, ser_show_schl, ser_update_profile
 
 
 
@@ -322,6 +322,7 @@ def sample_teachers(request):
             teach = Teachers.objects.order_by('id').reverse()[0:5]
             for a in teach:
                 data={}
+                data["id"] = a.id
                 data["schl_name"] = a.school.name
                 data["name"] = a.user.first_name
                 data["pic"] = str(a.user.user_info.pic)
@@ -344,6 +345,7 @@ def all_teachers(request):
             teach = Teachers.objects.order_by('id').reverse()
             for a in teach:
                 data={}
+                data["id"] = a.id
                 data["schl_name"] = a.school.name
                 data["name"] = a.user.first_name
                 data["pic"] = str(a.user.user_info.pic)
@@ -372,6 +374,7 @@ def school_filtered_teachers(request):
             teach = Teachers.objects.filter(school=schl).order_by('id').reverse()
             for a in teach:
                 data={}
+                data["id"] = a.id
                 data["schl_name"] = a.school.name
                 data["name"] = a.user.first_name
                 data["pic"] = str(a.user.user_info.pic)
@@ -390,6 +393,33 @@ def school_filtered_teachers(request):
         return Response({"is_logged_in": 0})
 
 
+@api_view(['POST'])
+def teacher_detail(request):
+    user = get_user_from_session(request.data["sessionid"])
+    if user is not None:
+        if user.user_info.role in [4,5]:
+            teach = Teachers.objects.get(pk=request.data["id"])
+            ser_user_info = ser_update_profile(User_Info.objects.get(user=teach.user))
+            data = ser_user_info.data
+            data["name"] = teach.user.first_name
+            data["father_name"] = teach.user.last_name
+            data["email"] = teach.user.email
+            data["school_name"] = teach.school.name
+            data["joining"] = teach.app_date
+            classes = teach.classes.all()
+            d=[]
+            for b in classes:
+                c={}
+                c["name"] = b.name
+                c["total_stu"] = b.reg_stu
+                d.append(c) 
+            data["classes"] = d
+
+            return Response(data)
+        else:
+            return Response({'status': 2})
+    else:
+        return Response({"is_logged_in": 0})
 
 
 
@@ -406,6 +436,7 @@ def sample_students(request):
             stu = Students.objects.order_by('user').reverse()[0:5]
             for a in stu:
                 data={}
+                data["id"] = a.user.id
                 data["schl_name"] = a.school.name
                 data["name"] = a.user.first_name
                 data["pic"] = str(a.user.user_info.pic)
@@ -428,6 +459,7 @@ def all_students(request):
             stu = Students.objects.order_by('user').reverse()
             for a in stu:
                 data={}
+                data["id"] = a.user.id
                 data["schl_name"] = a.school.name
                 data["name"] = a.user.first_name
                 data["pic"] = str(a.user.user_info.pic)
@@ -456,6 +488,7 @@ def school_filtered_students(request):
             stu = Students.objects.filter(school=schl).order_by('user').reverse()
             for a in stu:
                 data={}
+                data["id"] = a.user.id
                 data["schl_name"] = a.school.name
                 data["name"] = a.user.first_name
                 data["pic"] = str(a.user.user_info.pic)
@@ -472,3 +505,28 @@ def school_filtered_students(request):
             return Response({'status': 2})
     else:
         return Response({"is_logged_in": 0})
+
+
+@api_view(['POST'])
+def student_detail(request):
+    user = get_user_from_session(request.data["sessionid"])
+    if user is not None:
+        if user.user_info.role in [4,5]:
+            user = User.objects.get(pk=request.data["id"])
+            # teach = Teachers.objects.get(pk=)
+            ser_user_info = ser_update_profile(User_Info.objects.get(user=user))
+            data = ser_user_info.data
+            data["name"] = user.first_name
+            data["father_name"] = user.last_name
+            # data["email"] = user.email
+            data["school_name"] = user.students.school.name
+            data["class"] = user.students.class_name.name
+            data["joining"] = user.students.app_date
+
+            return Response(data)
+        else:
+            return Response({'status': 2})
+    else:
+        return Response({"is_logged_in": 0})
+
+

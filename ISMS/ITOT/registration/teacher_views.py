@@ -268,7 +268,8 @@ def activate_student(request):
         if stu.G_ID:
             password = request.data["password"]
             user.set_password(password)
-            return Response({"status": 1})                          # password set
+            user.save()
+            return Response({"status": 1,"P":password})                          # password set
         else:
             return Response({"status": 0})                          # student not approved
 
