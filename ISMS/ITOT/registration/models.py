@@ -1,5 +1,6 @@
 
 from datetime import datetime
+from time import timezone
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -50,7 +51,7 @@ class Teachers(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     school = models.ForeignKey(School, on_delete=models.CASCADE)
     classes = models.ManyToManyField(Classes)
-    app_date = models.DateField(auto_now_add=True)
+    app_date = models.DateField(auto_now_add=True,null=True,blank=True)
 
 
 class Applications(models.Model):

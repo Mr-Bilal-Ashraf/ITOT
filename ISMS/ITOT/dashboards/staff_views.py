@@ -14,25 +14,22 @@ from registration.models import Schedule, School, Applications, Teachers, Studen
 from registration.serializers import ser_schedules, ser_schl_apps, ser_show_schl, ser_update_profile
 
 
-
-
-
-#************************** Applications ********************************
+# ************************** Applications ********************************
 
 @api_view(['POST'])
 def show_school_applications(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
+        if user.user_info.role in [4, 5]:
             data = []
-            schls = Applications.objects.filter(role=0, status=0).values('school', 'app_date').order_by("id").reverse()
-                
+            schls = Applications.objects.filter(role=0, status=0).values(
+                'school', 'app_date').order_by("id").reverse()
+
             for schl in schls:
                 scl_obj = School.objects.get(pk=schl["school"])
                 result = {'id': scl_obj.id, 'logo': scl_obj.logo, 'name': scl_obj.name,
                           'city': scl_obj.city, 'app_date': schl["app_date"]}
                 data.append(result)
-            
 
             paginator = PageNumberPagination()
             paginator.page_size = 10
@@ -50,7 +47,7 @@ def show_school_applications(request):
 def show_specific_school(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
+        if user.user_info.role in [4, 5]:
             data = {}
             scl = School.objects.get(pk=request.data["id"])
 
@@ -99,7 +96,7 @@ def show_specific_school(request):
 def make_schedule(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
+        if user.user_info.role in [4, 5]:
             try:
                 data = request.data["date"]
                 schl = request.data["schl_id"]
@@ -110,8 +107,9 @@ def make_schedule(request):
                 time = list(map(int, data[1].split(":")))
                 time_to_send = time.copy()
                 date = datetime.datetime(date[0], date[1], date[2],
-                                time[0], time[1], tzinfo=pytz.UTC)
-                Schedule.objects.update_or_create(school=schl, defaults={'schedule': date})
+                                         time[0], time[1], tzinfo=pytz.UTC)
+                Schedule.objects.update_or_create(
+                    school=schl, defaults={'schedule': date})
                 date_to_send = f"{date_to_send[2]}-{MONTHS[date_to_send[1]-1]}-{date_to_send[0]}"
                 am = "AM"
                 if time_to_send[0] > 12:
@@ -125,7 +123,7 @@ def make_schedule(request):
                 from_email = "From <info.itotpk@gmail.com>"
                 to_email = schl.school_admins.user.email
                 send_mail("ITOT Visiting Schedule...", plain_message,
-                        from_email, [to_email], html_message=html_message)
+                          from_email, [to_email], html_message=html_message)
                 return Response({"status": 1})
             except:
                 return Response({"status": 2})
@@ -139,7 +137,7 @@ def make_schedule(request):
 def approve_school(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
+        if user.user_info.role in [4, 5]:
             schl = School.objects.get(pk=request.data["schl_id"])
             l_k = schl.l_key
             schl.is_active = True
@@ -163,7 +161,7 @@ def approve_school(request):
                       from_email, [to_email], html_message=html_message)
             return Response({'status': 1})
         else:
-            return Response({'status': 0})                   #not a super user
+            return Response({'status': 0})  # not a super user
     else:
         return Response({"is_logged_in": 0})
 
@@ -172,7 +170,7 @@ def approve_school(request):
 def reject_school(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
+        if user.user_info.role in [4, 5]:
             reason = request.data["reason"]
             schl_id = request.data["schl_id"]
             schl = School.objects.get(pk=schl_id)
@@ -182,7 +180,8 @@ def reject_school(request):
             plain_message = strip_tags(html_message)
             from_email = "From <info.itotpk@gmail.com>"
             to_email = schl.school_admins.user.email
-            send_mail("School Registration Status...", plain_message, from_email, [to_email], html_message=html_message)
+            send_mail("School Registration Status...", plain_message,
+                      from_email, [to_email], html_message=html_message)
             return Response({'status': 1})
         else:
             return Response({'status': 0})
@@ -190,16 +189,17 @@ def reject_school(request):
         return Response({"is_logged_in": 0})
 
 
-#************************* Schedules *******************************
+# ************************* Schedules *******************************
 
 
 @api_view(['POST'])
 def today_schedules(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
+        if user.user_info.role in [4, 5]:
             data_to_send = []
-            data = Schedule.objects.filter(schedule__gt=datetime.date.today(), schedule__lt=datetime.date.today() + datetime.timedelta(days=1))
+            data = Schedule.objects.filter(schedule__gt=datetime.date.today(
+            ), schedule__lt=datetime.date.today() + datetime.timedelta(days=1))
             for a in data:
                 b = {}
                 b["date"] = a.schedule
@@ -226,7 +226,7 @@ def today_schedules(request):
 def all_schedules(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
+        if user.user_info.role in [4, 5]:
             data_to_send = []
             data = Schedule.objects.all()
             for a in data:
@@ -255,7 +255,7 @@ def all_schedules(request):
 def passed_schedules(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
+        if user.user_info.role in [4, 5]:
             data_to_send = []
             data = Schedule.objects.filter(schedule__lt=datetime.date.today())
             for a in data:
@@ -284,7 +284,7 @@ def passed_schedules(request):
 def schedules_range(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
+        if user.user_info.role in [4, 5]:
             in_date = request.data["in_date"]
             out_date = request.data["out_date"]
             data_to_send = []
@@ -311,17 +311,17 @@ def schedules_range(request):
         return Response({"is_logged_in": 0})
 
 
-#************************* Teachers *******************************
+# ************************* Teachers *******************************
 
 @api_view(['POST'])
 def sample_teachers(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
-            data_to_send=[]
+        if user.user_info.role in [4, 5]:
+            data_to_send = []
             teach = Teachers.objects.order_by('id').reverse()[0:5]
             for a in teach:
-                data={}
+                data = {}
                 data["id"] = a.id
                 data["schl_name"] = a.school.name
                 data["name"] = a.user.first_name
@@ -340,11 +340,11 @@ def sample_teachers(request):
 def all_teachers(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
-            data_to_send=[]
+        if user.user_info.role in [4, 5]:
+            data_to_send = []
             teach = Teachers.objects.order_by('id').reverse()
             for a in teach:
-                data={}
+                data = {}
                 data["id"] = a.id
                 data["schl_name"] = a.school.name
                 data["name"] = a.user.first_name
@@ -354,7 +354,7 @@ def all_teachers(request):
                 data_to_send.append(data)
 
             paginator = PageNumberPagination()
-            paginator.page_size = 10
+            paginator.page_size = 1
             result_page = paginator.paginate_queryset(data_to_send, request)
 
             return paginator.get_paginated_response(result_page)
@@ -368,12 +368,13 @@ def all_teachers(request):
 def school_filtered_teachers(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
-            data_to_send=[]
+        if user.user_info.role in [4, 5]:
+            data_to_send = []
             schl = School.objects.get(name=request.data["schl_name"])
-            teach = Teachers.objects.filter(school=schl).order_by('id').reverse()
+            teach = Teachers.objects.filter(
+                school=schl).order_by('id').reverse()
             for a in teach:
-                data={}
+                data = {}
                 data["id"] = a.id
                 data["schl_name"] = a.school.name
                 data["name"] = a.user.first_name
@@ -397,9 +398,10 @@ def school_filtered_teachers(request):
 def teacher_detail(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
+        if user.user_info.role in [4, 5]:
             teach = Teachers.objects.get(pk=request.data["id"])
-            ser_user_info = ser_update_profile(User_Info.objects.get(user=teach.user))
+            ser_user_info = ser_update_profile(
+                User_Info.objects.get(user=teach.user))
             data = ser_user_info.data
             data["name"] = teach.user.first_name
             data["father_name"] = teach.user.last_name
@@ -407,12 +409,12 @@ def teacher_detail(request):
             data["school_name"] = teach.school.name
             data["joining"] = teach.app_date
             classes = teach.classes.all()
-            d=[]
+            d = []
             for b in classes:
-                c={}
+                c = {}
                 c["name"] = b.name
                 c["total_stu"] = b.reg_stu
-                d.append(c) 
+                d.append(c)
             data["classes"] = d
 
             return Response(data)
@@ -422,20 +424,18 @@ def teacher_detail(request):
         return Response({"is_logged_in": 0})
 
 
-
-
-#************************* Students *******************************
+# ************************* Students *******************************
 
 
 @api_view(['POST'])
 def sample_students(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
-            data_to_send=[]
+        if user.user_info.role in [4, 5]:
+            data_to_send = []
             stu = Students.objects.order_by('user').reverse()[0:5]
             for a in stu:
-                data={}
+                data = {}
                 data["id"] = a.user.id
                 data["schl_name"] = a.school.name
                 data["name"] = a.user.first_name
@@ -454,11 +454,11 @@ def sample_students(request):
 def all_students(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
-            data_to_send=[]
+        if user.user_info.role in [4, 5]:
+            data_to_send = []
             stu = Students.objects.order_by('user').reverse()
             for a in stu:
-                data={}
+                data = {}
                 data["id"] = a.user.id
                 data["schl_name"] = a.school.name
                 data["name"] = a.user.first_name
@@ -482,12 +482,13 @@ def all_students(request):
 def school_filtered_students(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
-            data_to_send=[]
+        if user.user_info.role in [4, 5]:
+            data_to_send = []
             schl = School.objects.get(name=request.data["schl_name"])
-            stu = Students.objects.filter(school=schl).order_by('user').reverse()
+            stu = Students.objects.filter(
+                school=schl).order_by('user').reverse()
             for a in stu:
-                data={}
+                data = {}
                 data["id"] = a.user.id
                 data["schl_name"] = a.school.name
                 data["name"] = a.user.first_name
@@ -511,14 +512,13 @@ def school_filtered_students(request):
 def student_detail(request):
     user = get_user_from_session(request.data["sessionid"])
     if user is not None:
-        if user.user_info.role in [4,5]:
+        if user.user_info.role in [4, 5]:
             user = User.objects.get(pk=request.data["id"])
-            # teach = Teachers.objects.get(pk=)
-            ser_user_info = ser_update_profile(User_Info.objects.get(user=user))
+            ser_user_info = ser_update_profile(
+                User_Info.objects.get(user=user))
             data = ser_user_info.data
             data["name"] = user.first_name
             data["father_name"] = user.last_name
-            # data["email"] = user.email
             data["school_name"] = user.students.school.name
             data["class"] = user.students.class_name.name
             data["joining"] = user.students.app_date
@@ -530,3 +530,63 @@ def student_detail(request):
         return Response({"is_logged_in": 0})
 
 
+# ************************* DashBoard *******************************
+
+
+@api_view(['POST'])
+def dashboard_counts(request):
+    user = get_user_from_session(request.data["sessionid"])
+    if user is not None:
+        if user.user_info.role in [4, 5]:
+            schl_counts = {}
+            teac_counts = {}
+            stu_counts = {}
+            sche_counts = {}
+            app_counts = {}
+
+            total_schools = School.objects.filter(is_active=True).count()
+            total_teachers = Teachers.objects.all().count()
+            toal_students = Students.objects.exclude(**{'G_ID': None}).count()
+            total_schedules = Schedule.objects.filter(
+                schedule__gt=datetime.date.today()).count()
+            total_applications = Applications.objects.filter(
+                role=0, status=0).count()
+
+            for a in range(1, 8):
+                schl_counts[(datetime.date.today()-datetime.timedelta(days=a)).strftime('%a')
+                            ] = School.objects.filter(app_date=datetime.date.today()-datetime.timedelta(days=a)).count()
+
+            for a in range(1, 8):
+                teac_counts[(datetime.date.today()-datetime.timedelta(days=a)).strftime('%a')
+                            ] = Teachers.objects.filter(app_date=datetime.date.today()-datetime.timedelta(days=a)).count()
+
+            for a in range(1, 8):
+                stu_counts[(datetime.date.today()-datetime.timedelta(days=a)).strftime('%a')
+                           ] = Students.objects.filter(app_date=datetime.date.today()-datetime.timedelta(days=a)).count()
+
+            for a in range(1, 8):
+                sche_counts[(datetime.date.today()+datetime.timedelta(days=a)).strftime('%a')] = Schedule.objects.filter(
+                    schedule__gt=datetime.date.today()+datetime.timedelta(days=a)).count()
+
+            for a in range(1, 8):
+                app_counts[(datetime.date.today()-datetime.timedelta(days=a)).strftime('%a')
+                           ] = Applications.objects.filter(app_date=datetime.date.today()-datetime.timedelta(days=a)).count()
+
+            a = {}
+            a["school_counts"] = schl_counts
+            a["teacher_counts"] = teac_counts
+            a["student_counts"] = stu_counts
+            a["schedule_counts"] = sche_counts
+            a["app_counts"] = app_counts
+            a["total_schools"] = total_schools
+            a["total_teachers"] = total_teachers
+            a["toal_students"] = toal_students
+            a["total_schedules"] = total_schedules
+            a["total_applications"] = total_applications
+
+            return Response(a)
+
+        else:
+            return Response({'status': 2})
+    else:
+        return Response({"is_logged_in": 0})

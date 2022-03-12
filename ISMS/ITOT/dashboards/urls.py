@@ -6,6 +6,7 @@ urlpatterns = [
 #********************* Staff Dashboard *************************
 
     #********* School **************
+    # path('staff/school/', staff_views., name="a"),
 
 
 
@@ -40,9 +41,10 @@ urlpatterns = [
 
     #********* Dashboard ***********
 
+    path('staff/counts/', staff_views.dashboard_counts, name="dashboard_counts"),
 
 
-    # path('staff/', staff_views., name="a"),
+
 #********************* School Dashboard ************************ 
 
 
